@@ -23,25 +23,22 @@ public class TriangleShape extends BaseShape {
 
     @Override
     public void draw(Canvas canvas) {
+        path.reset();
         if (isUpSideDown == false)
         {
-            path.reset();
             path.moveTo(x-width/2, y);           // Top
             path.lineTo(x, y-height);    // Bottom Left
             path.lineTo(x + width/2, y);    // Bottom Right
             path.lineTo(x-width/2, y);           // Close
-            path.close();
-            canvas.drawPath(path, paint);
         }
         else {
-            path.reset();
             path.moveTo(x - width / 2, y);           // Top
             path.lineTo(x, y + height);    // Bottom Left
             path.lineTo(x + width / 2, y);    // Bottom Right
             path.lineTo(x - width / 2, y);           // Close
-            path.close();
-            canvas.drawPath(path, paint);
         }
+        path.close();
+        canvas.drawPath(path, paint);
     }
 
     @Override

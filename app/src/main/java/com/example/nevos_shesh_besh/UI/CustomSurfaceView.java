@@ -45,16 +45,16 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         initBoardTriangles();
 
         // 3 Rectangles
-        shapes.add(new RectShape(200, 200, 200, 150, Color.RED));
-        shapes.add(new RectShape(500, 200, 150, 150, Color.BLUE));
-        shapes.add(new RectShape(800, 200, 100, 250, Color.GREEN));
+        //shapes.add(new RectShape(200, 200, 200, 150, Color.RED));
+        //shapes.add(new RectShape(500, 200, 150, 150, Color.BLUE));
+        //shapes.add(new RectShape(800, 200, 100, 250, Color.GREEN));
 
         // 1 Normal Circle
-        shapes.add(new CircleShape(300, 600, 80, Color.MAGENTA));
+        //shapes.add(new CircleShape(300, 600, 80, Color.MAGENTA));
 
         // 1 Special Teleport Circle
-        specialCircle = new TeleportCircle(700, 600, 100, Color.CYAN, Color.WHITE);
-        shapes.add(specialCircle);
+        //specialCircle = new TeleportCircle(700, 600, 100, Color.CYAN, Color.WHITE);
+        //shapes.add(specialCircle);
 
 
         Log.d(TAG, "initShapes: done");
@@ -74,6 +74,8 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
         float drawY = screenHeight - 10;
 
+        int color = Color.BLUE;
+
         for (int i = 0; i < numberOfTriangles; i++) {
 
             // חישוב נקודת המרכז של המשבצת הנוכחית
@@ -81,40 +83,32 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
             Log.d(TAG, String.format("initBoardTriangles: drawing triangle at: (%f,%f). width: %f, height: %f", drawX, drawY, drawWidth, drawHeight));
 
-            if (i%2 == 0)
-            {
-                int color = Color.RED;
-            }
+            if(i %2 == 0)
+                color = Color.BLACK;
             else
-            {
-                int color = Color.BLACK ;
-            }
+                color = Color.RED;
 
             shapes.add(new TriangleShape(drawX, drawY, drawWidth, drawHeight, false, color));
         }
-
+        drawY =0;
         for (int i = 0; i < numberOfTriangles; i++){
 
             float drawX = (i * sectionWidth) + (sectionWidth / 2);
 
             Log.d(TAG, String.format("initBoardTriangles: drawing triangle at: (%f,%f). width: %f, height: %f", drawX, drawY, drawWidth, drawHeight));
 
-            if (i%2 == 0)
-            {
-                int color = Color.BLACK;
-            }
+            if(i %2 == 0)
+                 color = Color.RED;
             else
-            {
-                int color = Color.RED;
-            }
-
-            shapes.add(new TriangleShape(drawX, drawY, drawWidth, drawHeight, false, color));
+                color = Color.BLACK;
+            shapes.add(new TriangleShape(drawX, drawY, drawWidth, drawHeight, true,color));
 
         }
 
 
 
     }
+
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
