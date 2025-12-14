@@ -6,29 +6,48 @@ import android.graphics.Path;
 import com.example.nevos_shesh_besh.shapes.BaseShape;
 
 public class TriangleShape extends BaseShape {
-    private final float size;
+    private final float width;
+
+    private final float height;
+
+    private boolean isUpSideDown;
+
     private final Path path;
-    public TriangleShape(float x, float y, float size, int color) {
+    public TriangleShape(float x, float y, float width, float height, boolean isUpSideDown, int color) {
         super(x, y, color);
-        this.size = size;
+        this.width = width;
+        this.height = height;
         this.path = new Path();
+        this.isUpSideDown = isUpSideDown;
     }
 
     @Override
     public void draw(Canvas canvas) {
-        path.reset();
-        path.moveTo(x, y - size);           // Top
-        path.lineTo(x - size, y + size);    // Bottom Left
-        path.lineTo(x + size, y + size);    // Bottom Right
-        path.lineTo(x, y - size);           // Close
-        path.close();
-        canvas.drawPath(path, paint);
+        if (isUpSideDown == false)
+        {
+            path.reset();
+            path.moveTo(x-width/2, y);           // Top
+            path.lineTo(x, y-height);    // Bottom Left
+            path.lineTo(x + width/2, y);    // Bottom Right
+            path.lineTo(x-width/2, y);           // Close
+            path.close();
+            canvas.drawPath(path, paint);
+        }
+        else {
+            path.reset();
+            path.moveTo(x - width / 2, y);           // Top
+            path.lineTo(x, y + height);    // Bottom Left
+            path.lineTo(x + width / 2, y);    // Bottom Right
+            path.lineTo(x - width / 2, y);           // Close
+            path.close();
+            canvas.drawPath(path, paint);
+        }
     }
 
     @Override
     public boolean isTouched(float touchX, float touchY) {
-        return touchX >= x - size && touchX <= x + size &&
-                touchY >= y - size && touchY <= y + size;
+        return touchX >= x - width/2 && touchX <= x + width/2 &&
+                touchY >= y && touchY <= y + height;
     }
 
 

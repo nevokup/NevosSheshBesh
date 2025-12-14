@@ -3,6 +3,7 @@ package com.example.nevos_shesh_besh.UI;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -22,13 +23,27 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
     private BaseShape selectedShape = null;
     private TeleportCircle specialCircle;
 
+    int screenWidth;
+    int screenHeight;
+
+    private static final String TAG = "CustomSurfaceView";
+
     public CustomSurfaceView(Context context) {
         super(context);
+        Log.d(TAG, "CustomSurfaceView: start");
+        
         getHolder().addCallback(this);
-        initShapes();
+
+        Log.d(TAG, "CustomSurfaceView: done");
     }
 
     private void initShapes() {
+
+        Log.d(TAG, "initShapes: start");
+
+
+        initBoardTriangles();
+
         // 3 Rectangles
         shapes.add(new RectShape(200, 200, 200, 150, Color.RED));
         shapes.add(new RectShape(500, 200, 150, 150, Color.BLUE));
@@ -41,19 +56,88 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         specialCircle = new TeleportCircle(700, 600, 100, Color.CYAN, Color.WHITE);
         shapes.add(specialCircle);
 
-        // 1 Triangle
-        shapes.add(new TriangleShape(500, 1000, 150, Color.YELLOW));
+
+        Log.d(TAG, "initShapes: done");
+    }
+
+    private void initBoardTriangles()
+    {
+        Log.d(TAG, "initBoardTriangles: start");
+
+        int numberOfTriangles = 12;
+
+        float sectionWidth = (float) screenWidth / numberOfTriangles;
+
+        float drawWidth = (float) 0.9 * sectionWidth;
+
+        float drawHeight = (float) 0.45 * screenHeight;
+
+        float drawY = screenHeight - 10;
+
+        for (int i = 0; i < numberOfTriangles; i++) {
+
+            // חישוב נקודת המרכז של המשבצת הנוכחית
+            float drawX = (i * sectionWidth) + (sectionWidth / 2);
+
+            Log.d(TAG, String.format("initBoardTriangles: drawing triangle at: (%f,%f). width: %f, height: %f", drawX, drawY, drawWidth, drawHeight));
+
+            if (i%2 == 0)
+            {
+                int color = Color.RED;
+            }
+            else
+            {
+                int color = Color.BLACK ;
+            }
+
+            shapes.add(new TriangleShape(drawX, drawY, drawWidth, drawHeight, false, color));
+        }
+
+        for (int i = 0; i < numberOfTriangles; i++){
+
+            float drawX = (i * sectionWidth) + (sectionWidth / 2);
+
+            Log.d(TAG, String.format("initBoardTriangles: drawing triangle at: (%f,%f). width: %f, height: %f", drawX, drawY, drawWidth, drawHeight));
+
+            if (i%2 == 0)
+            {
+                int color = Color.BLACK;
+            }
+            else
+            {
+                int color = Color.RED;
+            }
+
+            shapes.add(new TriangleShape(drawX, drawY, drawWidth, drawHeight, false, color));
+
+        }
+
+
+
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        Log.d(TAG, "surfaceCreated: start");
         gameThread = new GameThread(getHolder(), this);
         gameThread.setRunning(true);
         gameThread.start();
+
+        Log.d(TAG, "surfaceCreated: done");
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) 
+    {
+        Log.d(TAG, "surfaceChanged: start");
+        screenWidth = width;
+        screenHeight = height;
+
+        //TODO - move to the right place
+        initShapes();
+
+        Log.d(TAG, "surfaceChanged: done");
+    }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
