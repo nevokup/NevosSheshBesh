@@ -19,12 +19,19 @@ import com.example.nevos_shesh_besh.shapes.TriangleShape;
 
 public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     private GameThread gameThread;
-    private final List<BaseShape> shapes = new ArrayList<>();
+    private final List<TriangleShape> triangles = new ArrayList<>();
+
+    private  final  List<CircleShape> circles = new ArrayList<>();
     private BaseShape selectedShape = null;
     private TeleportCircle specialCircle;
 
     int screenWidth;
     int screenHeight;
+
+    private int numberOfTriangles;
+
+    int[] initPositionsP1 = {0,0,0,0,3,0,5,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,5};
+    int[] initPositionsP2 = {5,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,5,0,3,0,0,0,0};
 
     private static final String TAG = "CustomSurfaceView";
 
@@ -33,6 +40,8 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         Log.d(TAG, "CustomSurfaceView: start");
         
         getHolder().addCallback(this);
+
+        numberOfTriangles = 12;
 
         Log.d(TAG, "CustomSurfaceView: done");
     }
@@ -43,6 +52,9 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
 
         initBoardTriangles();
+
+        initBoardCircle();
+
 
         // 3 Rectangles
         //shapes.add(new RectShape(200, 200, 200, 150, Color.RED));
@@ -63,8 +75,6 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
     private void initBoardTriangles()
     {
         Log.d(TAG, "initBoardTriangles: start");
-
-        int numberOfTriangles = 12;
 
         float sectionWidth = (float) screenWidth / numberOfTriangles;
 
@@ -88,24 +98,59 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
             else
                 color = Color.RED;
 
-            shapes.add(new TriangleShape(drawX, drawY, drawWidth, drawHeight, false, color));
+            triangles.add(new TriangleShape(drawX, drawY, drawWidth, drawHeight, false, color));
         }
         drawY =0;
         for (int i = 0; i < numberOfTriangles; i++){
 
-            float drawX = (i * sectionWidth) + (sectionWidth / 2);
+            float drawX = screenWidth - ((i * sectionWidth) + (sectionWidth / 2));
 
             Log.d(TAG, String.format("initBoardTriangles: drawing triangle at: (%f,%f). width: %f, height: %f", drawX, drawY, drawWidth, drawHeight));
 
             if(i %2 == 0)
-                 color = Color.RED;
+                 color = Color.BLACK;
             else
-                color = Color.BLACK;
-            shapes.add(new TriangleShape(drawX, drawY, drawWidth, drawHeight, true,color));
+                color = Color.RED;
+            triangles.add(new TriangleShape(drawX, drawY, drawWidth, drawHeight, true,color));
 
         }
 
+    }
 
+
+    private void initBoardCircle(){
+
+        float sectionWidth = (float) screenWidth / numberOfTriangles;
+
+        float drawRadius = (float) 0.4 * sectionWidth / 2;
+
+
+        int color = Color.BLUE;
+
+        for (int i = 0; i < initPositionsP1.length; i++) {
+
+            for (int j = 0; j < initPositionsP1[i]; j++) {
+                // חישוב נקודת המרכז של המשבצת הנוכחית
+
+                Log.d(TAG, String.format("initBoardCircle: drawing circle at triangle: %d", i));
+
+                circles.add(new CircleShape(drawRadius, color, triangles.get(i)));
+            }
+        }
+
+
+         color = Color.WHITE;
+
+        for (int i = 0; i < initPositionsP2 .length; i++) {
+
+            for (int j = 0; j < initPositionsP2[i]; j++) {
+                // חישוב נקודת המרכז של המשבצת הנוכחית
+
+                Log.d(TAG, String.format("initBoardCircle: drawing circle at triangle: %d", i));
+
+                circles.add(new CircleShape(drawRadius, color, triangles.get(i)));
+            }
+        }
 
     }
 
@@ -155,9 +200,15 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         // Background color
         canvas.drawColor(Color.DKGRAY);
 
-        for (BaseShape shape : shapes) {
-            shape.draw(canvas);
+        for (TriangleShape triangle : triangles) {
+            triangle.draw(canvas);
         }
+
+        for (CircleShape circle : circles) {
+            circle.draw(canvas);
+        }
+
+
     }
 
     @Override
@@ -175,17 +226,9 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
                 }
 
                 // Logic 2: Hit detection
-                for (int i = shapes.size() - 1; i >= 0; i--) {
-                    BaseShape shape = shapes.get(i);
-                    if (shape.isTouched(x, y)) {
-                        if (shape == specialCircle) {
-                            specialCircle.setActive(true);
-                        } else {
-                            selectedShape = shape;
-                            // Bring to front
-                            shapes.remove(i);
-                            shapes.add(shape);
-                        }
+                for (int i = triangles.size() - 1; i >= 0; i--) {
+                    TriangleShape triangle = triangles.get(i);
+                    if (triangle.isTouched(x, y)) {
                         return true;
                     }
                 }

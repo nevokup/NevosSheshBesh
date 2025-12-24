@@ -12,6 +12,8 @@ public class TriangleShape extends BaseShape {
 
     private boolean isUpSideDown;
 
+    private int circlesCount;
+
     private final Path path;
     public TriangleShape(float x, float y, float width, float height, boolean isUpSideDown, int color) {
         super(x, y, color);
@@ -19,6 +21,30 @@ public class TriangleShape extends BaseShape {
         this.height = height;
         this.path = new Path();
         this.isUpSideDown = isUpSideDown;
+        this.circlesCount = 0;
+    }
+
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public int addCircle() {
+        circlesCount++;
+
+        return circlesCount;
+    }
+
+    public void removeCircle() {
+        circlesCount--;
+    }
+
+    public boolean getIsUpSideDown()
+    {
+        return isUpSideDown;
     }
 
     @Override

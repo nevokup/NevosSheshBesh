@@ -5,7 +5,7 @@ public class TeleportCircle extends CircleShape {
     private final int activeColor;
     public boolean isActive = false;
     public TeleportCircle(float x, float y, float radius, int color, int activeColor) {
-        super(x, y, radius, color);
+        super(radius, color,null);
         this.originalColor = color;
         this.activeColor = activeColor;
     }
