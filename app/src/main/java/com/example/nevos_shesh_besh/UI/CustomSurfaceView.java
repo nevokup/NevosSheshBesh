@@ -10,11 +10,8 @@ import android.view.SurfaceView;
 import java.util.ArrayList;
 import java.util.List;
 // Import shapes
-import com.example.nevos_shesh_besh.shapes.*;
-import com.example.nevos_shesh_besh.shapes.BaseShape;
+import com.example.nevos_shesh_besh.R;
 import com.example.nevos_shesh_besh.shapes.CircleShape;
-import com.example.nevos_shesh_besh.shapes.RectShape;
-import com.example.nevos_shesh_besh.shapes.TeleportCircle;
 import com.example.nevos_shesh_besh.shapes.TriangleShape;
 
 public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
@@ -22,8 +19,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
     private final List<TriangleShape> triangles = new ArrayList<>();
 
     private  final  List<CircleShape> circles = new ArrayList<>();
-    private BaseShape selectedShape = null;
-    private TeleportCircle specialCircle;
+    private CircleShape selectedCircle;
 
     int screenWidth;
     int screenHeight;
@@ -42,6 +38,8 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         getHolder().addCallback(this);
 
         numberOfTriangles = 12;
+
+        selectedCircle = null;
 
         Log.d(TAG, "CustomSurfaceView: done");
     }
@@ -134,7 +132,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
                 Log.d(TAG, String.format("initBoardCircle: drawing circle at triangle: %d", i));
 
-                circles.add(new CircleShape(drawRadius, color, triangles.get(i)));
+                circles.add(new CircleShape(drawRadius, color, triangles.get(i), R.color.Aqua));
             }
         }
 
@@ -148,7 +146,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
                 Log.d(TAG, String.format("initBoardCircle: drawing circle at triangle: %d", i));
 
-                circles.add(new CircleShape(drawRadius, color, triangles.get(i)));
+                circles.add(new CircleShape(drawRadius, color, triangles.get(i), R.color.LightGrey));
             }
         }
 
@@ -219,29 +217,39 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 // Logic 1: Teleportation if active
-                if (specialCircle.isActive) {
-                    specialCircle.setPosition(x, y);
-                    specialCircle.setActive(false);
+                if (selectedCircle != null) {
+                    for (int i = triangles.size() - 1; i >= 0; i--) {
+                        TriangleShape triangle = triangles.get(i);
+                        if (triangle.isTouched(x, y)) {
+                            selectedCircle.moveToTriangle(triangle);
+                            selectedCircle.setActive(false);
+                            selectedCircle = null;
+                        }
+                    }
                     return true;
                 }
 
-                // Logic 2: Hit detection
-                for (int i = triangles.size() - 1; i >= 0; i--) {
-                    TriangleShape triangle = triangles.get(i);
-                    if (triangle.isTouched(x, y)) {
+
+                // Logic 2: Circle Hit detection
+                for (int i = circles.size() - 1; i >= 0; i--) {
+                    CircleShape circle = circles.get(i);
+                    if (circle.isTouched(x, y)) {
+                        circle.setActive(true);
+                        selectedCircle = circle;
                         return true;
                     }
                 }
+
+                // Logic 2: Hit detection
+
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                if (selectedShape != null) {
-                    selectedShape.setPosition(x, y);
-                }
+
                 break;
 
             case MotionEvent.ACTION_UP:
-                selectedShape = null;
+
                 break;
         }
         return true;

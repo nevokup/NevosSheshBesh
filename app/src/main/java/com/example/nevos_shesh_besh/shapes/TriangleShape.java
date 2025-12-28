@@ -69,8 +69,22 @@ public class TriangleShape extends BaseShape {
 
     @Override
     public boolean isTouched(float touchX, float touchY) {
-        return touchX >= x - width/2 && touchX <= x + width/2 &&
-                touchY >= y && touchY <= y + height;
+
+        if(!(touchX >= x - width/2 && touchX <= x + width/2))
+            return false;
+
+        if (isUpSideDown)
+        {
+            if(touchY >= y && touchY <= y + height)
+                return true;
+        }
+        else
+        {
+            if(touchY <= y && touchY >= y - height)
+                return true;
+        }
+
+        return false;
     }
 
 
