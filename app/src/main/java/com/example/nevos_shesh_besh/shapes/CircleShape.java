@@ -20,6 +20,7 @@ public class CircleShape extends BaseShape {
 
         this.radius = radius;
 
+        this.triangle = null; // Initialize to null so moveToTriangle works correctly
         moveToTriangle(triangle);
 
 
@@ -33,6 +34,10 @@ public class CircleShape extends BaseShape {
             this.triangle.removeCircle();
 
         this.triangle = triangle;
+
+        if (triangle == null) {
+            return;
+        }
 
         int circlesCount = triangle.addCircle();
 
@@ -63,6 +68,10 @@ public class CircleShape extends BaseShape {
         return y;
     }
 
+    public int getColor() {
+        return originalColor;
+    }
+
     @Override
     public void draw(Canvas canvas) {
         canvas.drawCircle(x, y, radius, paint);
@@ -70,8 +79,14 @@ public class CircleShape extends BaseShape {
 
     @Override
     public boolean isTouched(float touchX, float touchY) {
+
         double dx = touchX - x;
         double dy = touchY - y;
+
+        Log.d(TAG, String.format("isTouched: touchX=%f, touchY=%f", touchX, touchY));
+        Log.d(TAG, String.format("isTouched: x=%f, y=%f", x, y));
+        Log.d(TAG, String.format("isTouched: x=%f, y=%f", dx, dy));
+
         return (dx * dx + dy * dy) <= (radius * radius);
     }
 

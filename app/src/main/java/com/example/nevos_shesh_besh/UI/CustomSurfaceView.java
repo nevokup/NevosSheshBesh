@@ -236,6 +236,8 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         float x = event.getX();
         float y = event.getY();
 
+        Log.d(TAG, "onTouchEvent: x: " +x + ", y: " + y);
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 // Logic 1: Teleportation if active
@@ -262,11 +264,8 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
                             if (topCircle != null) {
                                 topCircle.setActive(true);
                                 selectedCircle = topCircle;
-                                return true;
                             }
                         }
-                        circle.setActive(true);
-                        selectedCircle = circle;
                         return true;
                     }
                 }

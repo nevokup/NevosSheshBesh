@@ -2,6 +2,7 @@ package com.example.nevos_shesh_besh.shapes;
 
 import android.graphics.Canvas;
 import android.graphics.Path;
+import android.util.Log;
 
 import com.example.nevos_shesh_besh.shapes.BaseShape;
 
@@ -15,6 +16,9 @@ public class TriangleShape extends BaseShape {
     private int circlesCount;
 
     private final Path path;
+
+    private static final String TAG = "TriangleShape";
+    
     public TriangleShape(float x, float y, float width, float height, boolean isUpSideDown, int color) {
         super(x, y, color);
         this.width = width;
@@ -69,6 +73,9 @@ public class TriangleShape extends BaseShape {
 
     @Override
     public boolean isTouched(float touchX, float touchY) {
+
+        Log.d(TAG, String.format("isTouched: touchX=%f, touchY=%f", touchX, touchY));
+        Log.d(TAG, String.format("isTouched: x=%f, y=%f", x, y));
 
         if(!(touchX >= x - width/2 && touchX <= x + width/2))
             return false;
