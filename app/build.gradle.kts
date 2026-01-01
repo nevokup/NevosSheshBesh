@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.nevos_shesh_besh"
-        minSdk = 35
+        minSdk = 30
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"

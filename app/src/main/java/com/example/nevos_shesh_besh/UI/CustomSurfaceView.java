@@ -209,6 +209,28 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
     }
 
+    private CircleShape getTopCircle(TriangleShape triangle) {
+        CircleShape topCircle = null;
+        for (CircleShape c : circles) {
+            if (c.getTriangle() == triangle) {
+                if (topCircle == null) {
+                    topCircle = c;
+                } else {
+                    if (triangle.getIsUpSideDown()) {
+                        if (c.getY() > topCircle.getY()) {
+                            topCircle = c;
+                        }
+                    } else {
+                        if (c.getY() < topCircle.getY()) {
+                            topCircle = c;
+                        }
+                    }
+                }
+            }
+        }
+        return topCircle;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
@@ -234,6 +256,15 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
                 for (int i = circles.size() - 1; i >= 0; i--) {
                     CircleShape circle = circles.get(i);
                     if (circle.isTouched(x, y)) {
+                        TriangleShape triangle = circle.getTriangle();
+                        if (triangle != null) {
+                            CircleShape topCircle = getTopCircle(triangle);
+                            if (topCircle != null) {
+                                topCircle.setActive(true);
+                                selectedCircle = topCircle;
+                                return true;
+                            }
+                        }
                         circle.setActive(true);
                         selectedCircle = circle;
                         return true;
@@ -257,4 +288,3 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
 
 }
-

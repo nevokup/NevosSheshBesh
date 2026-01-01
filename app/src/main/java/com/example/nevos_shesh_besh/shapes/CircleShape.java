@@ -55,6 +55,14 @@ public class CircleShape extends BaseShape {
 
     }
 
+    public TriangleShape getTriangle() {
+        return triangle;
+    }
+
+    public float getY() {
+        return y;
+    }
+
     @Override
     public void draw(Canvas canvas) {
         canvas.drawCircle(x, y, radius, paint);
@@ -74,4 +82,3 @@ public class CircleShape extends BaseShape {
 
 
 }
-
