@@ -27,6 +27,7 @@ public class Game {
         if(!isLegalMove(index))
         {
             Log.d(TAG, "move: move is not legal. index: " + index);
+            return false;
         }
 
         if(moveFrom == -1)
@@ -52,13 +53,13 @@ public class Game {
         return true;
     }
 
-    private boolean isLegalMove(int index)
-    {
-        if(moveFrom == -1)
-        {
-            if(board[index] == 0)
+    private boolean isLegalMove(int index) {
+        if (moveFrom == -1) {
+            if (board[index] == 0)
                 return false;
+            return true;
         }
+
         return true;
     }
 
