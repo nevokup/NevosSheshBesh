@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 // Import shapes
 import com.example.nevos_shesh_besh.R;
+import com.example.nevos_shesh_besh.model.Game;
 import com.example.nevos_shesh_besh.shapes.CircleShape;
 import com.example.nevos_shesh_besh.shapes.TriangleShape;
 
@@ -29,9 +30,11 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
     int[] initPositionsP1 = {0,0,0,0,3,0,5,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,5};
     int[] initPositionsP2 = {5,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,5,0,3,0,0,0,0};
 
+    Game game;
+
     private static final String TAG = "CustomSurfaceView";
 
-    public CustomSurfaceView(Context context) {
+    public CustomSurfaceView(Context context, Game game) {
         super(context);
         Log.d(TAG, "CustomSurfaceView: start");
         
@@ -40,6 +43,8 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         numberOfTriangles = 12;
 
         selectedCircle = null;
+
+        this.game = game;
 
         Log.d(TAG, "CustomSurfaceView: done");
     }
@@ -51,7 +56,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
         initBoardTriangles();
 
-        initBoardCircle();
+        //initBoardCircle();
 
 
         // 3 Rectangles
@@ -96,7 +101,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
             else
                 color = Color.RED;
 
-            triangles.add(new TriangleShape(drawX, drawY, drawWidth, drawHeight, false, color));
+            triangles.add(new TriangleShape(drawX, drawY, drawWidth, drawHeight, false, color, game.getBoard()[i]));
         }
         drawY =0;
         for (int i = 0; i < numberOfTriangles; i++){
@@ -109,7 +114,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
                  color = Color.BLACK;
             else
                 color = Color.RED;
-            triangles.add(new TriangleShape(drawX, drawY, drawWidth, drawHeight, true,color));
+            triangles.add(new TriangleShape(drawX, drawY, drawWidth, drawHeight, true,color,game.getBoard()[i]+numberOfTriangles));
 
         }
 
@@ -132,7 +137,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
                 Log.d(TAG, String.format("initBoardCircle: drawing circle at triangle: %d", i));
 
-                circles.add(new CircleShape(drawRadius, color, triangles.get(i), R.color.Aqua));
+                //circles.add(new CircleShape(drawRadius, color, triangles.get(i), R.color.Aqua));
             }
         }
 
@@ -146,7 +151,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
                 Log.d(TAG, String.format("initBoardCircle: drawing circle at triangle: %d", i));
 
-                circles.add(new CircleShape(drawRadius, color, triangles.get(i), R.color.LightGrey));
+                //circles.add(new CircleShape(drawRadius, color, triangles.get(i), R.color.LightGrey));
             }
         }
 
@@ -198,13 +203,16 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         // Background color
         canvas.drawColor(Color.DKGRAY);
 
+        int i=0;
         for (TriangleShape triangle : triangles) {
-            triangle.draw(canvas);
+            triangle.draw(canvas, game.getBoard()[i]);
+            i++;
         }
 
-        for (CircleShape circle : circles) {
-            circle.draw(canvas);
-        }
+
+        //for (CircleShape circle : circles) {
+        //    circle.draw(canvas);
+        //}
 
 
     }
@@ -241,31 +249,13 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 // Logic 1: Teleportation if active
-                if (selectedCircle != null) {
-                    for (int i = triangles.size() - 1; i >= 0; i--) {
-                        TriangleShape triangle = triangles.get(i);
-                        if (triangle.isTouched(x, y)) {
-                            selectedCircle.moveToTriangle(triangle);
-                            selectedCircle.setActive(false);
-                            selectedCircle = null;
-                        }
-                    }
-                    return true;
-                }
-
-
                 // Logic 2: Circle Hit detection
-                for (int i = circles.size() - 1; i >= 0; i--) {
-                    CircleShape circle = circles.get(i);
-                    if (circle.isTouched(x, y)) {
-                        TriangleShape triangle = circle.getTriangle();
-                        if (triangle != null) {
-                            CircleShape topCircle = getTopCircle(triangle);
-                            if (topCircle != null) {
-                                topCircle.setActive(true);
-                                selectedCircle = topCircle;
-                            }
-                        }
+                for (int i = 0; i <  triangles.size(); i++) {
+                    TriangleShape triangle = triangles.get(i);
+                    if (triangle.isTouched(x, y)) {
+                        game.move(i);
+                        Log.d(TAG, "onTouchEvent: touched triangle: " + i);
+
                         return true;
                     }
                 }

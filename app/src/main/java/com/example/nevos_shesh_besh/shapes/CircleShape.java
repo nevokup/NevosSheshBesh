@@ -15,14 +15,10 @@ public class CircleShape extends BaseShape {
 
     private static final String TAG = "CircleShape";
 
-    public CircleShape(float radius, int color, TriangleShape triangle, int activeColor) {
-        super(triangle.getX(), triangle.getY(), color);
+    public CircleShape(float radius, int color, float x, float y, int activeColor) {
+        super(x, y, color);
 
         this.radius = radius;
-
-        this.triangle = null; // Initialize to null so moveToTriangle works correctly
-        moveToTriangle(triangle);
-
 
         this.originalColor = color;
         this.activeColor = activeColor;

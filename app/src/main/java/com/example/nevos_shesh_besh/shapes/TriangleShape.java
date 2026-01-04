@@ -1,9 +1,11 @@
 package com.example.nevos_shesh_besh.shapes;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Path;
 import android.util.Log;
 
+import com.example.nevos_shesh_besh.R;
 import com.example.nevos_shesh_besh.shapes.BaseShape;
 
 public class TriangleShape extends BaseShape {
@@ -19,13 +21,13 @@ public class TriangleShape extends BaseShape {
 
     private static final String TAG = "TriangleShape";
     
-    public TriangleShape(float x, float y, float width, float height, boolean isUpSideDown, int color) {
+    public TriangleShape(float x, float y, float width, float height, boolean isUpSideDown, int color, int circlesCount) {
         super(x, y, color);
         this.width = width;
         this.height = height;
         this.path = new Path();
         this.isUpSideDown = isUpSideDown;
-        this.circlesCount = 0;
+        this.circlesCount = circlesCount;
     }
 
     public float getX() {
@@ -69,6 +71,52 @@ public class TriangleShape extends BaseShape {
         }
         path.close();
         canvas.drawPath(path, paint);
+
+        if(circlesCount > 0)
+        {
+            int count = circlesCount;
+            int color = Color.BLUE;
+            int activeColor =  R.color.Aqua;
+
+            if(count > 100)
+            {
+                count-=100;
+                color = Color.WHITE;
+                activeColor = R.color.LightGrey;
+            }
+
+
+            float drawRadius = (float) 0.4 * width / 2;
+
+            float drawX = this.getX();
+            float drawY;
+
+
+
+            Log.d(TAG, "moveToTriangle: drawing circle. count: " + circlesCount + ", x: " + x + ", y: " + y);
+
+            for (int i = 0; i < count; i++)
+            {
+                if(this.getIsUpSideDown())
+                {
+                    drawY = this.getY() + drawRadius + 2*drawRadius*i;
+                }
+                else
+                {
+                    drawY = this.getY() - drawRadius - 2*drawRadius*i;
+                }
+
+                CircleShape circle = new CircleShape(drawRadius, color, drawX, drawY, activeColor);
+                circle.draw(canvas);
+            }
+        }
+
+    }
+
+    public void draw(Canvas canvas, int circlesCount)
+    {
+        this.circlesCount = circlesCount;
+        draw(canvas);
     }
 
     @Override
