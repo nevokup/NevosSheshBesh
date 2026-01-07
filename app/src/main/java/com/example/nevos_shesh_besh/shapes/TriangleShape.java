@@ -38,15 +38,7 @@ public class TriangleShape extends BaseShape {
         return y;
     }
 
-    public int addCircle() {
-        circlesCount++;
 
-        return circlesCount;
-    }
-
-    public void removeCircle() {
-        circlesCount--;
-    }
 
     public boolean getIsUpSideDown()
     {
@@ -76,13 +68,21 @@ public class TriangleShape extends BaseShape {
         {
             int count = circlesCount;
             int color = Color.BLUE;
-            int activeColor =  R.color.Aqua;
+            int activeColor =  Color.MAGENTA;
+
+            boolean drawActiveCircle = false;
+
+            if(count >= 1000)
+            {
+                count -= 1000;
+                drawActiveCircle = true;
+            }
 
             if(count > 100)
             {
                 count-=100;
                 color = Color.WHITE;
-                activeColor = R.color.LightGrey;
+                activeColor = Color.YELLOW;
             }
 
 
@@ -106,7 +106,11 @@ public class TriangleShape extends BaseShape {
                     drawY = this.getY() - drawRadius - 2*drawRadius*i;
                 }
 
-                CircleShape circle = new CircleShape(drawRadius, color, drawX, drawY, activeColor);
+                if(drawActiveCircle && i == count - 1)
+                    color = activeColor;
+
+                CircleShape circle = new CircleShape(drawRadius, color, drawX, drawY);
+
                 circle.draw(canvas);
             }
         }

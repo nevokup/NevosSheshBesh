@@ -3,12 +3,13 @@ package com.example.nevos_shesh_besh.model;
 import android.util.Log;
 
 public class Game {
-    int[] initPositionsP1 = {0, 0, 0, 0, 3, 0, 5, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5};
-    int[] initPositionsP2 = {5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 5, 0, 3, 0, 0, 0, 0};
+    int[] initPositionsP1 = {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 3, 0, 5, 0, 0, 0, 0, 0};
+    int[] initPositionsP2 = {0, 0, 0, 0, 0, 5, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2};
 
     int[] board;
 
     int moveFrom;
+    boolean isP1Turn;
 
     private static final String TAG = "Game";
 
@@ -17,6 +18,7 @@ public class Game {
         board = new int[24];
         initBoard();
         moveFrom = -1;
+        isP1Turn = true;
     }
 
     public int[] getBoard() {
@@ -33,9 +35,13 @@ public class Game {
         if(moveFrom == -1)
         {
             moveFrom = index;
+            board[moveFrom] += 1000;
         }
         else
         {
+            if (board[moveFrom] >= 1000)
+                board[moveFrom] -= 1000;
+
             board[moveFrom]--;
 
             if(board[moveFrom] >= 100)
@@ -49,16 +55,53 @@ public class Game {
 
             board[index]++;
             moveFrom = -1;
+            isP1Turn = !isP1Turn;
         }
         return true;
     }
 
     private boolean isLegalMove(int index) {
+
+        //move from phase
         if (moveFrom == -1) {
             if (board[index] == 0)
                 return false;
+
+            //בודק שכל שחקן משחק בתור שלו ולא בתור של היריב
+            if (isP1Turn) {
+                if (board[index] >= 100) return false;
+            }
+            else {
+                if (board[index] < 100) return false;
+            }
+
             return true;
         }
+
+        //move to phase
+
+        //בודק ששחקן כחול לא יכול לעלות על שחקן לבן וההפך
+        if (board[moveFrom] >= 100) {
+            if (board[index] > 1 && board[index] < 100) {
+                return false;
+            }
+        }
+        else {
+            if (board[index] >= 102) {
+                return false;
+            }
+        }
+
+        //בודק שהשחקן הולך בכיוון הנכון ולא בכיוון הנגדי
+        if (isP1Turn) {
+            if (index < moveFrom)
+                return false;
+        }
+        else {
+            if (index > moveFrom)
+                return false;
+        }
+
 
         return true;
     }
