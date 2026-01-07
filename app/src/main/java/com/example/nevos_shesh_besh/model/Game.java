@@ -10,6 +10,7 @@ public class Game {
 
     int moveFrom;
     boolean isP1Turn;
+    int movesMade;
 
     private static final String TAG = "Game";
 
@@ -19,6 +20,7 @@ public class Game {
         initBoard();
         moveFrom = -1;
         isP1Turn = true;
+        movesMade = 0;
     }
 
     public int[] getBoard() {
@@ -55,7 +57,16 @@ public class Game {
 
             board[index]++;
             moveFrom = -1;
-            isP1Turn = !isP1Turn;
+
+            movesMade++;
+
+            int movesToDo = 2;
+
+
+            if (movesMade >= movesToDo) {
+                isP1Turn = !isP1Turn;
+                movesMade = 0;
+            }
         }
         return true;
     }
@@ -81,7 +92,7 @@ public class Game {
         //move to phase
 
         //בודק ששחקן כחול לא יכול לעלות על שחקן לבן וההפך
-        if (board[moveFrom] >= 100) {
+        if (!isP1Turn) {
             if (board[index] > 1 && board[index] < 100) {
                 return false;
             }
@@ -91,6 +102,7 @@ public class Game {
                 return false;
             }
         }
+
 
         //בודק שהשחקן הולך בכיוון הנכון ולא בכיוון הנגדי
         if (isP1Turn) {
