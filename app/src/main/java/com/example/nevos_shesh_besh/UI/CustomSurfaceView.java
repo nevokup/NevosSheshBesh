@@ -13,6 +13,7 @@ import java.util.List;
 import com.example.nevos_shesh_besh.R;
 import com.example.nevos_shesh_besh.model.Game;
 import com.example.nevos_shesh_besh.shapes.CircleShape;
+import com.example.nevos_shesh_besh.shapes.DieShape;
 import com.example.nevos_shesh_besh.shapes.TriangleShape;
 
 public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
@@ -21,6 +22,9 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
     private  final  List<CircleShape> circles = new ArrayList<>();
     private CircleShape selectedCircle;
+
+    private DieShape die1;
+    private DieShape die2;
 
     int screenWidth;
     int screenHeight;
@@ -37,7 +41,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
     public CustomSurfaceView(Context context, Game game) {
         super(context);
         Log.d(TAG, "CustomSurfaceView: start");
-        
+
         getHolder().addCallback(this);
 
         numberOfTriangles = 12;
@@ -56,21 +60,14 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
         initBoardTriangles();
 
-        //initBoardCircle();
+        float dieSize = screenWidth / 20f;
+        float die1X = screenWidth / 2f - dieSize * 1.2f;
+        float dieY = screenHeight / 2f - dieSize / 2f;
+        float die2X = screenWidth / 2f + dieSize * 0.2f;
 
-
-        // 3 Rectangles
-        //shapes.add(new RectShape(200, 200, 200, 150, Color.RED));
-        //shapes.add(new RectShape(500, 200, 150, 150, Color.BLUE));
-        //shapes.add(new RectShape(800, 200, 100, 250, Color.GREEN));
-
-        // 1 Normal Circle
-        //shapes.add(new CircleShape(300, 600, 80, Color.MAGENTA));
-
-        // 1 Special Teleport Circle
-        //specialCircle = new TeleportCircle(700, 600, 100, Color.CYAN, Color.WHITE);
-        //shapes.add(specialCircle);
-
+        int[] diceValues = game.getDice();
+        die1 = new DieShape(diceValues[0], die1X, dieY, dieSize);
+        die2 = new DieShape(diceValues[1], die2X, dieY, dieSize);
 
         Log.d(TAG, "initShapes: done");
     }
@@ -169,7 +166,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) 
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
     {
         Log.d(TAG, "surfaceChanged: start");
         screenWidth = width;
@@ -209,7 +206,13 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
             i++;
         }
 
-
+        if(die1 != null && die2 != null) {
+            int[] diceValues = game.getDice();
+            die1.setNumber(diceValues[0]);
+            die2.setNumber(diceValues[1]);
+            die1.draw(canvas);
+            die2.draw(canvas);
+        }
     }
 
 
