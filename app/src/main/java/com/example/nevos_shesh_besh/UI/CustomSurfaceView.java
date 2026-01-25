@@ -20,9 +20,6 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
     private GameThread gameThread;
     private final List<TriangleShape> triangles = new ArrayList<>();
 
-    private  final  List<CircleShape> circles = new ArrayList<>();
-    private CircleShape selectedCircle;
-
     private DieShape die1;
     private DieShape die2;
 
@@ -45,8 +42,6 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         getHolder().addCallback(this);
 
         numberOfTriangles = 12;
-
-        selectedCircle = null;
 
         this.game = game;
 
@@ -76,7 +71,8 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
     {
         Log.d(TAG, "initBoardTriangles: start");
 
-        float sectionWidth = (float) screenWidth / numberOfTriangles;
+        // + 1 for the middle line
+        float sectionWidth = (float) screenWidth / (numberOfTriangles + 1);
 
         float drawWidth = (float) 0.9 * sectionWidth;
 
@@ -91,6 +87,9 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
             // חישוב נקודת המרכז של המשבצת הנוכחית
             float drawX = (i * sectionWidth) + (sectionWidth / 2);
 
+            if(i >= numberOfTriangles / 2)
+                drawX += sectionWidth;
+
             Log.d(TAG, String.format("initBoardTriangles: drawing triangle at: (%f,%f). width: %f, height: %f", drawX, drawY, drawWidth, drawHeight));
 
             if(i %2 == 0)
@@ -104,6 +103,8 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         for (int i = 0; i < numberOfTriangles; i++){
 
             float drawX = screenWidth - ((i * sectionWidth) + (sectionWidth / 2));
+            if(i >= numberOfTriangles / 2)
+                drawX -= sectionWidth;
 
             Log.d(TAG, String.format("initBoardTriangles: drawing triangle at: (%f,%f). width: %f, height: %f", drawX, drawY, drawWidth, drawHeight));
 
@@ -118,41 +119,6 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
     }
 
 
-    private void initBoardCircle(){
-
-        float sectionWidth = (float) screenWidth / numberOfTriangles;
-
-        float drawRadius = (float) 0.4 * sectionWidth / 2;
-
-
-        int color = Color.BLUE;
-
-        for (int i = 0; i < initPositionsP1.length; i++) {
-
-            for (int j = 0; j < initPositionsP1[i]; j++) {
-                // חישוב נקודת המרכז של המשבצת הנוכחית
-
-                Log.d(TAG, String.format("initBoardCircle: drawing circle at triangle: %d", i));
-
-                //circles.add(new CircleShape(drawRadius, color, triangles.get(i), R.color.Aqua));
-            }
-        }
-
-
-         color = Color.WHITE;
-
-        for (int i = 0; i < initPositionsP2 .length; i++) {
-
-            for (int j = 0; j < initPositionsP2[i]; j++) {
-                // חישוב נקודת המרכז של המשבצת הנוכחית
-
-                Log.d(TAG, String.format("initBoardCircle: drawing circle at triangle: %d", i));
-
-                //circles.add(new CircleShape(drawRadius, color, triangles.get(i), R.color.LightGrey));
-            }
-        }
-
-    }
 
 
     @Override

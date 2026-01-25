@@ -20,6 +20,9 @@ public class Game {
     int movesMade;
     int movesToDo;
 
+    int p1EatenCount;
+    int p2EatenCount;
+
     private static final String TAG = "Game";
 
 
@@ -32,6 +35,8 @@ public class Game {
         moveFrom = -1;
         isP1Turn = true;
         movesMade = 0;
+        p1EatenCount = 0;
+        p2EatenCount = 0;
     }
 
     public int[] getBoard() {
@@ -97,6 +102,21 @@ public class Game {
         }
         else
         {
+            // Eating logic
+            if (isP1Turn) {
+                // Player 1 is moving. Check if destination has a single P2 checker.
+                if (board[index] == 101) { // 101 means 1 checker for P2
+                    p2EatenCount++;
+                    board[index] = 0; // Remove P2's checker from the board
+                }
+            } else {
+                // Player 2 is moving. Check if destination has a single P1 checker.
+                if (board[index] == 1) { // 1 means 1 checker for P1
+                    p1EatenCount++;
+                    board[index] = 0; // Remove P1's checker from the board
+                }
+            }
+
             if (board[moveFrom] >= 1000)
                 board[moveFrom] -= 1000;
 
@@ -147,7 +167,7 @@ public class Game {
         }
 
         //move to phase
-
+        
         //בודק ששחקן כחול לא יכול לעלות על שחקן לבן וההפך
         if (!isP1Turn) {
             if (board[index] > 1 && board[index] < 100) {
