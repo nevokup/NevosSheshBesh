@@ -182,7 +182,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         }
 
         if(middleLine != null){
-            middleLine.draw(canvas);
+            middleLine.draw(canvas, game.getP1EatenCount(), game.getP2EatenCount());
         }
 
         if(die1 != null && die2 != null) {

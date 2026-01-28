@@ -47,6 +47,14 @@ public class Game {
         return dice;
     }
 
+    public int getP1EatenCount() {
+        return p1EatenCount;
+    }
+
+    public int getP2EatenCount() {
+        return p2EatenCount;
+    }
+
     public void rollDice() {
         dice[0] = random.nextInt(6) + 1;
         dice[1] = random.nextInt(6) + 1;
