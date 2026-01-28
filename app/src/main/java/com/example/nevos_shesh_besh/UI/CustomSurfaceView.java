@@ -3,6 +3,7 @@ package com.example.nevos_shesh_besh.UI;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.RectF;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -20,8 +21,8 @@ import com.example.nevos_shesh_besh.shapes.TriangleShape;
 public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     private GameThread gameThread;
     private final List<TriangleShape> triangles = new ArrayList<>();
-    private MiddleLineShape middleLine;
 
+    private MiddleLineShape middleLine;
     private DieShape die1;
     private DieShape die2;
 
@@ -56,17 +57,21 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
 
         initBoardTriangles();
-
         middleLine = new MiddleLineShape(screenWidth, screenHeight, numberOfTriangles);
+        RectF middleRect = middleLine.getRect();
 
-        float dieSize = screenWidth / 20f;
-        float die1X = screenWidth / 2f - dieSize * 1.2f;
-        float dieY = screenHeight / 2f - dieSize / 2f;
-        float die2X = screenWidth / 2f + dieSize * 0.2f;
+        float dieSize = middleRect.width() * 0.8f; // Make die smaller than the line width
+        float dieX = middleRect.centerX() - (dieSize / 2);
+
+        // Position dice vertically, one top, one bottom on the middle line area
+        float die1Y = screenHeight / 5f - dieSize / 2f;
+        float die2Y = screenHeight * 4 / 5f - dieSize / 2f;
+
 
         int[] diceValues = game.getDice();
-        die1 = new DieShape(diceValues[0], die1X, dieY, dieSize);
-        die2 = new DieShape(diceValues[1], die2X, dieY, dieSize);
+        die1 = new DieShape(diceValues[0], dieX, die1Y, dieSize);
+        die2 = new DieShape(diceValues[1], dieX, die2Y, dieSize);
+
 
         Log.d(TAG, "initShapes: done");
     }
@@ -170,14 +175,14 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         // Background color
         canvas.drawColor(Color.DKGRAY);
 
-        if(middleLine != null) {
-            middleLine.draw(canvas);
-        }
-
         int i=0;
         for (TriangleShape triangle : triangles) {
             triangle.draw(canvas, game.getBoard()[i]);
             i++;
+        }
+
+        if(middleLine != null){
+            middleLine.draw(canvas);
         }
 
         if(die1 != null && die2 != null) {
