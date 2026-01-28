@@ -14,11 +14,13 @@ import com.example.nevos_shesh_besh.R;
 import com.example.nevos_shesh_besh.model.Game;
 import com.example.nevos_shesh_besh.shapes.CircleShape;
 import com.example.nevos_shesh_besh.shapes.DieShape;
+import com.example.nevos_shesh_besh.shapes.MiddleLineShape;
 import com.example.nevos_shesh_besh.shapes.TriangleShape;
 
 public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     private GameThread gameThread;
     private final List<TriangleShape> triangles = new ArrayList<>();
+    private MiddleLineShape middleLine;
 
     private DieShape die1;
     private DieShape die2;
@@ -54,6 +56,8 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
 
         initBoardTriangles();
+
+        middleLine = new MiddleLineShape(screenWidth, screenHeight, numberOfTriangles);
 
         float dieSize = screenWidth / 20f;
         float die1X = screenWidth / 2f - dieSize * 1.2f;
@@ -165,6 +169,10 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
         // Background color
         canvas.drawColor(Color.DKGRAY);
+
+        if(middleLine != null) {
+            middleLine.draw(canvas);
+        }
 
         int i=0;
         for (TriangleShape triangle : triangles) {
