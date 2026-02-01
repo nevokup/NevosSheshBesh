@@ -36,17 +36,17 @@ public class MiddleLineShape {
 
         float checkerRadius = rect.width() / 4;
 
-        // Draw eaten P1 checkers
+        // Draw eaten P1 checkers (Blue)
         for (int i = 0; i < p1EatenCount; i++) {
             float cx = rect.centerX();
-            float cy = rect.bottom - checkerRadius - (i * 2 * checkerRadius);
+            float cy = rect.top + checkerRadius + (i * 2 * checkerRadius); // Start from top
             canvas.drawCircle(cx, cy, checkerRadius, p1Paint);
         }
 
-        // Draw eaten P2 checkers
+        // Draw eaten P2 checkers (White)
         for (int i = 0; i < p2EatenCount; i++) {
             float cx = rect.centerX();
-            float cy = rect.top + checkerRadius + (i * 2 * checkerRadius);
+            float cy = rect.bottom - checkerRadius - (i * 2 * checkerRadius); // Start from bottom
             canvas.drawCircle(cx, cy, checkerRadius, p2Paint);
         }
     }

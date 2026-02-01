@@ -31,9 +31,9 @@ public class Game {
         dice = new int[2];
         random = new Random();
         initBoard();
+        isP1Turn = true;
         rollDice();
         moveFrom = -1;
-        isP1Turn = true;
         movesMade = 0;
         p1EatenCount = 0;
         p2EatenCount = 0;
@@ -58,7 +58,7 @@ public class Game {
     public void rollDice() {
         dice[0] = random.nextInt(6) + 1;
         dice[1] = random.nextInt(6) + 1;
-        
+
         availableMoves = new ArrayList<>();
         if (dice[0] == dice[1]) {
             movesToDo = 4;
@@ -70,7 +70,40 @@ public class Game {
             availableMoves.add(dice[0]);
             availableMoves.add(dice[1]);
         }
+        checkIfPlayerIsStuck();
     }
+
+    private void checkIfPlayerIsStuck() {
+        if ((isP1Turn && p1EatenCount == 0) || (!isP1Turn && p2EatenCount == 0)) {
+            // If not re-entering, we assume there's a move. A more complex check for general stuck positions can be added later.
+            return;
+        }
+
+        boolean hasValidReEntryMove = false;
+        for (int diceValue : new ArrayList<>(availableMoves)) { // Iterate over a copy
+            int targetIndex;
+            if (isP1Turn) {
+                targetIndex = diceValue - 1;
+                if (board[targetIndex] < 102) { // Is the spot open for P1?
+                    hasValidReEntryMove = true;
+                    break;
+                }
+            } else { // Player 2's turn
+                targetIndex = 24 - diceValue;
+                boolean isBlockedByP1 = board[targetIndex] >= 2 && board[targetIndex] < 100;
+                if (!isBlockedByP1) { // Is the spot open for P2?
+                    hasValidReEntryMove = true;
+                    break;
+                }
+            }
+        }
+
+        if (!hasValidReEntryMove) {
+            Log.d(TAG, "Player is stuck on re-entry. Ending turn.");
+            endTurn();
+        }
+    }
+
 
     public boolean move(int index)
     {
@@ -103,44 +136,74 @@ public class Game {
         }
 
         // If we are here, the move is legal.
-        if(moveFrom == -1)
-        {
+        boolean isReEntering = (isP1Turn && p1EatenCount > 0) || (!isP1Turn && p2EatenCount > 0);
+
+        if (isReEntering) {
+            if (isP1Turn) {
+                // Player 1 re-entering
+                if (board[index] == 101) { // Eating a P2 checker
+                    p2EatenCount++;
+                    board[index] = 1; // Becomes one P1 checker
+                } else {
+                    board[index]++; // Add a P1 checker
+                }
+                p1EatenCount--;
+                availableMoves.remove(Integer.valueOf(index + 1));
+            } else {
+                // Player 2 re-entering
+                if (board[index] == 1) { // Eating a P1 checker
+                    p1EatenCount++;
+                    board[index] = 101; // Becomes one P2 checker
+                } else {
+                    if (board[index] == 0) board[index] = 100;
+                    board[index]++; // Add a P2 checker
+                }
+                p2EatenCount--;
+                availableMoves.remove(Integer.valueOf(24 - index));
+            }
+
+            movesMade++;
+            if (movesMade >= movesToDo) {
+                endTurn();
+            }
+        } else if (moveFrom == -1) {
+            // This is a normal move, starting with selecting a checker
             moveFrom = index;
             board[moveFrom] += 1000;
-        }
-        else
-        {
+        } else {
+            // This is the second part of a normal move
             // Eating logic
             if (isP1Turn) {
-                // Player 1 is moving. Check if destination has a single P2 checker.
-                if (board[index] == 101) { // 101 means 1 checker for P2
+                if (board[index] == 101) { // P1 eats a single P2 checker
                     p2EatenCount++;
-                    board[index] = 0; // Remove P2's checker from the board
+                    board[index] = 0;
                 }
             } else {
-                // Player 2 is moving. Check if destination has a single P1 checker.
-                if (board[index] == 1) { // 1 means 1 checker for P1
+                if (board[index] == 1) { // P2 eats a single P1 checker
                     p1EatenCount++;
-                    board[index] = 0; // Remove P1's checker from the board
+                    board[index] = 0;
                 }
             }
 
+            // Move checker from 'moveFrom' to 'index'
             if (board[moveFrom] >= 1000)
                 board[moveFrom] -= 1000;
 
             board[moveFrom]--;
 
-            if(board[moveFrom] >= 100)
-            {
-                if(board[index] == 0)
-                    board[index]+=100;
+            if (isP1Turn) {
+                 board[index]++;
+            } else {
+                if (board[index] == 0) board[index] = 100;
+                board[index]++;
+            }
 
-                if(board[moveFrom] == 100)
+            if (board[moveFrom] % 100 == 0 && board[moveFrom] != 0) { // check if it was a P2 spot and now its empty
+                if(board[moveFrom] < 1000) // dont reset selected checkers
                     board[moveFrom] = 0;
             }
 
-            board[index]++;
-            
+
             int distance = isP1Turn ? (index - moveFrom) : (moveFrom - index);
             availableMoves.remove(Integer.valueOf(distance));
 
@@ -148,59 +211,63 @@ public class Game {
             movesMade++;
 
             if (movesMade >= movesToDo) {
-                isP1Turn = !isP1Turn;
-                movesMade = 0;
-                rollDice();
+                endTurn();
             }
         }
         return true;
     }
 
+    private void endTurn() {
+        isP1Turn = !isP1Turn;
+        movesMade = 0;
+        moveFrom = -1;
+        rollDice();
+    }
+
     private boolean isLegalMove(int index) {
+        // Player must re-enter eaten checkers first.
+        if (isP1Turn && p1EatenCount > 0) {
+            int diceValue = index + 1;
+            if (!availableMoves.contains(diceValue)) return false;
+            // P1 can enter on a free spot, their own spot, or a spot with a single P2 checker.
+            return board[index] < 102;
+        }
 
-        //move from phase
+        if (!isP1Turn && p2EatenCount > 0) {
+            int diceValue = 24 - index;
+            if (!availableMoves.contains(diceValue)) return false;
+            // P2 can enter on an empty spot, a spot with one P1 checker, or their own spot.
+            // i.e., not a spot blocked by P1 (2 or more P1 checkers).
+            boolean isBlockedByP1 = board[index] >= 2 && board[index] < 100;
+            return !isBlockedByP1;
+        }
+
+        // If a checker is not selected yet, check if the selected checker is valid.
         if (moveFrom == -1) {
-            if (board[index] == 0)
-                return false;
-
-            //בודק שכל שחקן משחק בתור שלו ולא בתור של היריב
+            if (board[index] == 0) return false;
             if (isP1Turn) {
-                if (board[index] >= 100) return false;
-            }
-            else {
-                if (board[index] < 100) return false;
-            }
-
-            return true;
-        }
-
-        //move to phase
-        
-        //בודק ששחקן כחול לא יכול לעלות על שחקן לבן וההפך
-        if (!isP1Turn) {
-            if (board[index] > 1 && board[index] < 100) {
-                return false;
-            }
-        }
-        else {
-            if (board[index] >= 102) {
-                return false;
+                return board[index] < 100; // P1 can only select P1 checkers
+            } else {
+                return board[index] >= 100; // P2 can only select P2 checkers
             }
         }
 
-
-        //בודק שהשחקן הולך בכיוון הנכון ולא בכיוון הנגדי
+        // If a checker is already selected, check if the destination is valid.
+        // Check for blocked destination
         if (isP1Turn) {
-            if (index < moveFrom)
-                return false;
+            if (board[index] >= 102) return false; // P1 cannot move to a spot with 2 or more P2 checkers
+        } else {
+            if (board[index] > 1 && board[index] < 100) return false; // P2 cannot move to a spot with 2 or more P1 checkers
         }
-        else {
-            if (index > moveFrom)
-                return false;
+
+        // Check for correct direction
+        if (isP1Turn) {
+            if (index < moveFrom) return false;
+        } else {
+            if (index > moveFrom) return false;
         }
-        
-        
-        //בודק שהשחקן הולך למשולש שמותר לו לפי הקוביות
+
+        // Check if the move distance matches a dice roll
         int distance = isP1Turn ? index - moveFrom : moveFrom - index;
         if (!availableMoves.contains(distance)) {
             Log.d(TAG, "isLegalMove: Invalid move distance: " + distance + ". Available moves: " + availableMoves.toString());
@@ -210,19 +277,13 @@ public class Game {
         return true;
     }
 
-
     private void initBoard() {
         for (int i = 0; i < board.length; i++) {
-
             if (initPositionsP1[i] > 0) {
                 board[i] = initPositionsP1[i];
-            }
-
-            else if (initPositionsP2[i] > 0) {
+            } else if (initPositionsP2[i] > 0) {
                 board[i] = initPositionsP2[i] + 100;
             }
         }
-
     }
-
 }
