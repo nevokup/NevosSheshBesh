@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Random;
 
 public class Game {
-    int[] initPositionsP1 = {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 3, 0, 5, 0, 0, 0, 0, 0};
-    int[] initPositionsP2 = {0, 0, 0, 0, 0, 5, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2};
+
+    boolean DeTests = false;
 
     int[] board;
     int[] dice;
@@ -278,6 +278,17 @@ public class Game {
     }
 
     private void initBoard() {
+        int[] initPositionsP1;
+        int[] initPositionsP2;
+
+        if (DeTests == false) {
+            initPositionsP1 = new int[]{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 3, 0, 5, 0, 0, 0, 0, 0};
+            initPositionsP2 = new int[]{0, 0, 0, 0, 0, 5, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2};
+        } else {
+            initPositionsP1 = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 3, 2, 3, 2};
+            initPositionsP2 = new int[]{2, 3, 2, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        }
+
         for (int i = 0; i < board.length; i++) {
             if (initPositionsP1[i] > 0) {
                 board[i] = initPositionsP1[i];
