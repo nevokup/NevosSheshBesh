@@ -3,13 +3,12 @@ package com.example.nevos_shesh_besh.model;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 public class Game {
 
-    boolean DeTests = true;
+    boolean DeTests = false;
 
     int[] board;
     int[] dice;
@@ -27,6 +26,24 @@ public class Game {
     int p2OffBoard;
 
     private static final String TAG = "Game";
+
+    // --- Win Logic: Types and Listener ---
+    public enum WinType {
+        REGULAR,        // ניצחון רגיל (1 נקודה)
+        MARS,           // מארס (2 נקודות)
+        TURKISH_MARS    // מארס טורקי (3 נקודות - יש חייל בבית המנצח או אכול)
+    }
+
+    public interface GameOverListener {
+        void onGameOver(String winnerName, WinType winType, int score);
+    }
+
+    private GameOverListener gameOverListener;
+
+    public void setGameOverListener(GameOverListener listener) {
+        this.gameOverListener = listener;
+    }
+    // -------------------------------------
 
     public Game() {
         board = new int[24];
@@ -73,7 +90,6 @@ public class Game {
             if (canBearOff(isP1Turn)) {
                 return;
             }
-            // Add more logic here if needed for normal moves
             return;
         }
 
@@ -111,19 +127,16 @@ public class Game {
             return true;
         }
 
-        // --- NEW & FIXED: Bearing off logic ---
-        // We check bearing off ONLY if no checker is currently selected (moveFrom == -1)
+        // --- Bearing off logic ---
         if (canBearOff(isP1Turn) && moveFrom == -1) {
             boolean isMyChecker = isP1Turn ? (board[index] > 0 && board[index] < 100) : (board[index] >= 100);
 
             if (isMyChecker) {
-                // Try to get a valid die for bearing off
                 Integer roll = getBestDiceForBearOff(index);
 
                 if (roll != null) {
-                    // Execute Bear Off
                     board[index]--;
-                    if (!isP1Turn && board[index] % 100 == 0) board[index] = 0; // Clean up P2 marker
+                    if (!isP1Turn && board[index] % 100 == 0) board[index] = 0;
 
                     if (isP1Turn) p1OffBoard++;
                     else p2OffBoard++;
@@ -131,32 +144,35 @@ public class Game {
                     availableMoves.remove(roll);
                     movesMade++;
 
+                    // --- CHECK WIN AFTER BEARING OFF ---
+                    checkWinCondition();
+                    if (p1OffBoard == 15 || p2OffBoard == 15) return true; // Game Over
+                    // -----------------------------------
+
                     if (movesMade >= movesToDo || availableMoves.isEmpty()) {
                         endTurn();
                     }
                     return true;
                 }
-                // If roll is null, it means we can't bear off THIS checker,
-                // but we might be able to move it internally. So we let the code continue to selection logic.
             }
         }
 
-        // Check if the move is legal. If not, check for re-selection.
+        // Check legality
         if (!isLegalMove(index)) {
             if (moveFrom != -1) {
                 boolean isMyNewChecker = (isP1Turn && board[index] > 0 && board[index] < 100) ||
                         (!isP1Turn && board[index] >= 100 && board[index] < 1000);
                 if (isMyNewChecker) {
-                    board[moveFrom] -= 1000; // Deselect old
-                    moveFrom = index;        // Select new
-                    board[moveFrom] += 1000; // Highlight new
+                    board[moveFrom] -= 1000;
+                    moveFrom = index;
+                    board[moveFrom] += 1000;
                     return true;
                 }
             }
             return false;
         }
 
-        // Logic for executing a normal move or re-entry
+        // Execute Move
         boolean isReEntering = (isP1Turn && p1EatenCount > 0) || (!isP1Turn && p2EatenCount > 0);
 
         if (isReEntering) {
@@ -172,14 +188,18 @@ public class Game {
                 availableMoves.remove(Integer.valueOf(24 - index));
             }
             movesMade++;
+
+            // --- CHECK WIN AFTER RE-ENTRY (Rare but possible if opponent forfeits) ---
+            checkWinCondition();
+            if (p1OffBoard == 15 || p2OffBoard == 15) return true;
+
             if (movesMade >= movesToDo) endTurn();
 
         } else if (moveFrom == -1) {
-            // Select checker
             moveFrom = index;
             board[moveFrom] += 1000;
         } else {
-            // Execute Move
+            // Standard Move
             if (isP1Turn) {
                 if (board[index] == 101) { p2EatenCount++; board[index] = 0; }
             } else {
@@ -205,9 +225,70 @@ public class Game {
             moveFrom = -1;
             movesMade++;
 
+            // --- CHECK WIN ---
+            checkWinCondition();
+            if (p1OffBoard == 15 || p2OffBoard == 15) return true;
+
             if (movesMade >= movesToDo) endTurn();
         }
         return true;
+    }
+
+    private void checkWinCondition() {
+        if (p1OffBoard == 15) {
+            WinType type = calculateWinType(true);
+            if (gameOverListener != null) {
+                gameOverListener.onGameOver("Player 1", type, getScore(type));
+            }
+        } else if (p2OffBoard == 15) {
+            WinType type = calculateWinType(false);
+            if (gameOverListener != null) {
+                gameOverListener.onGameOver("Player 2", type, getScore(type));
+            }
+        }
+    }
+
+    private WinType calculateWinType(boolean p1Won) {
+        if (p1Won) {
+            // P1 wins, check P2 status
+            if (p2OffBoard > 0) return WinType.REGULAR;
+
+            // Mars check. Turkish if P2 has checker on bar or in P1's home (18-23)
+            boolean isTurkish = p2EatenCount > 0;
+            if (!isTurkish) {
+                for (int i = 18; i < 24; i++) {
+                    if (board[i] >= 100) {
+                        isTurkish = true;
+                        break;
+                    }
+                }
+            }
+            return isTurkish ? WinType.TURKISH_MARS : WinType.MARS;
+
+        } else {
+            // P2 wins, check P1 status
+            if (p1OffBoard > 0) return WinType.REGULAR;
+
+            // Mars check. Turkish if P1 has checker on bar or in P2's home (0-5)
+            boolean isTurkish = p1EatenCount > 0;
+            if (!isTurkish) {
+                for (int i = 0; i < 6; i++) {
+                    if (board[i] > 0 && board[i] < 100) {
+                        isTurkish = true;
+                        break;
+                    }
+                }
+            }
+            return isTurkish ? WinType.TURKISH_MARS : WinType.MARS;
+        }
+    }
+
+    private int getScore(WinType type) {
+        switch (type) {
+            case MARS: return 2;
+            case TURKISH_MARS: return 3;
+            default: return 1;
+        }
     }
 
     private boolean canBearOff(boolean isP1) {
@@ -225,26 +306,15 @@ public class Game {
         return true;
     }
 
-    // --- FIXED FUNCTION ---
     private Integer getBestDiceForBearOff(int checkerIndex) {
-        // Calculate distance from exit
-        // P1 exits at hypothetical 24 (Board indices 18-23). Distance = 24 - index.
-        // P2 exits at hypothetical -1 (Board indices 0-5). Distance = index + 1.
         int dist = isP1Turn ? (24 - checkerIndex) : (checkerIndex + 1);
 
-        // 1. Check for Exact Match (Best case)
         if (availableMoves.contains(dist)) {
             return dist;
         }
 
-        // 2. Check for High Die Rule (If dice > dist, AND this is the furthest checker)
-        // Find the furthest checker's distance
         int furthestDistance = -1;
-
         if (isP1Turn) {
-            // Iterate from 18 upwards. The first index we find with a checker is the furthest from 24.
-            // Example: checkers on 20 and 23. Loop checks 18, 19, 20(Found!).
-            // Dist for 20 is 4. Dist for 23 is 1. 4 is the furthest distance.
             for (int i = 18; i < 24; i++) {
                 if (board[i] > 0 && board[i] < 100) {
                     furthestDistance = 24 - i;
@@ -252,7 +322,6 @@ public class Game {
                 }
             }
         } else {
-            // Iterate from 5 downwards. The first index we find is furthest from 0.
             for (int i = 5; i >= 0; i--) {
                 if (board[i] >= 100) {
                     furthestDistance = i + 1;
@@ -261,24 +330,12 @@ public class Game {
             }
         }
 
-        // If the clicked checker is NOT the furthest one, we cannot use a larger dice.
         if (dist != furthestDistance) {
             return null;
         }
 
-        // If we are here, this IS the furthest checker.
-        // Now check if there is ANY dice larger than the distance.
-        // We look for the smallest die that is still larger than dist (standard logic),
-        // or just any available one since the rule allows it.
-        Integer bestHighDie = null;
         for (Integer roll : availableMoves) {
-            if (roll > dist) {
-                // We prefer the largest die if we want to get rid of big numbers,
-                // OR just the first one found.
-                // In your example: Roll 6,5. Checkers on 5. Dist is 5.
-                // 6 > 5. Valid.
-                return roll;
-            }
+            if (roll > dist) return roll;
         }
 
         return null;
