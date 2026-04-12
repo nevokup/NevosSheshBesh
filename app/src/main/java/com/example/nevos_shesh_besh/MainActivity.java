@@ -1,70 +1,80 @@
 package com.example.nevos_shesh_besh;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
-
+import android.view.MotionEvent;
+import android.widget.EditText;
+import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.nevos_shesh_besh.UI.CustomSurfaceView;
 import com.example.nevos_shesh_besh.model.Game;
 
 public class MainActivity extends AppCompatActivity {
+    private Game game;
+    private NetworkManager networkManager;
+    private CustomSurfaceView gameView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        game = new Game();
+        networkManager = new NetworkManager();
 
-        // 1. יצירת האובייקט של המשחק
-        Game game = new Game();
+        game.setGameOverListener((winnerName, winType, score) ->
+                runOnUiThread(() -> showWinnerDialog(winnerName, winType, score))
+        );
 
-        // 2. הגדרת המאזין לסוף המשחק
-        game.setGameOverListener(new Game.GameOverListener() {
-            @Override
-            public void onGameOver(String winnerName, Game.WinType winType, int score) {
-                // מריצים את הדיאלוג על ה-Main Thread
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showWinnerDialog(winnerName, winType, score);
-                    }
-                });
-            }
-        });
+        showLobbyDialog();
+    }
 
-        // 3. יצירת התצוגה והעברת המשחק אליה
-        setContentView(new CustomSurfaceView(this, game));
+    private void showLobbyDialog() {
+        String[] options = {"צור משחק", "הצטרף למשחק"};
+        new AlertDialog.Builder(this)
+                .setTitle("שש-בש אונליין")
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) startGameAsHost();
+                    else showJoinDialog();
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    private void startGameAsHost() {
+        String code = String.valueOf((int)(Math.random() * 9000) + 1000);
+        game.localPlayerIsP1 = true;
+        networkManager.createGame(code, game, data -> game.updateFromMap(data));
+        Toast.makeText(this, "קוד משחק: " + code, Toast.LENGTH_LONG).show();
+        startGameView();
+    }
+
+    private void showJoinDialog() {
+        final EditText input = new EditText(this);
+        new AlertDialog.Builder(this)
+                .setTitle("הכנס קוד")
+                .setView(input)
+                .setPositiveButton("הצטרף", (dialog, which) -> {
+                    game.localPlayerIsP1 = false;
+                    networkManager.joinGame(input.getText().toString(), data -> game.updateFromMap(data));
+                    startGameView();
+                }).show();
+    }
+
+    private void startGameView() {
+        gameView = new CustomSurfaceView(this, game);
+        setContentView(gameView);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        boolean handled = super.dispatchTouchEvent(ev);
+        if (ev.getAction() == MotionEvent.ACTION_UP) {
+            networkManager.updateGameState(game);
+        }
+        return handled;
     }
 
     private void showWinnerDialog(String winnerName, Game.WinType winType, int score) {
-        String typeString = "";
-        switch (winType) {
-            case REGULAR:
-                typeString = "רגיל";
-                break;
-            case MARS:
-                typeString = "מארס!";
-                break;
-            case TURKISH_MARS:
-                typeString = "מארס טורקי (כוכבים)!!!";
-                break;
-        }
-
-        String message = "המנצח הוא: " + winnerName + "\n" +
-                "סוג הניצחון: " + typeString + "\n" +
-                "ניקוד: " + score;
-
-        new AlertDialog.Builder(this)
-                .setTitle("GAME OVER!")
-                .setMessage(message)
-                .setCancelable(false) // אי אפשר לסגור בלי ללחוץ על הכפתור
-                .setPositiveButton("משחק חדש", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // מתחיל מחדש את האקטיביטי (משחק חדש)
-                        recreate();
-                    }
-                })
-                .show();
+        new AlertDialog.Builder(this).setTitle("סוף משחק").setMessage("המנצח: " + winnerName)
+                .setPositiveButton("חדש", (d, w) -> recreate()).show();
     }
 }
