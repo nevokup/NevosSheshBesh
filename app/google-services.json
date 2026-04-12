@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "918545355947",
+    "project_id": "nevo-shesh-besh",
+    "storage_bucket": "nevo-shesh-besh.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:918545355947:android:e45bf72c61e7b0a5b453ee",
+        "android_client_info": {
+          "package_name": "com.example.nevos_shesh_besh"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUp4M01IxJHYPiZmWXiPBLFMpl_ax3FvY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
