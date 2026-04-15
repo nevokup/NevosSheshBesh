@@ -8,7 +8,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class Login extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,7 +19,7 @@ public class Login extends AppCompatActivity {
         EditText etPass = findViewById(R.id.et_password);
         Button btnLogin = findViewById(R.id.btn_login_submit);
         Button btnGoToRegister = findViewById(R.id.btn_go_to_register);
-        TextView tvForgotPass = findViewById(R.id.tv_go_to_register); // משמש כעת ל"שכחת סיסמה"
+        TextView tvForgotPass = findViewById(R.id.tv_go_to_register); // משמש ל"שכחת סיסמה" לפי ה-ID ב-XML
 
         // כפתור התחברות
         btnLogin.setOnClickListener(v -> {
@@ -33,10 +33,10 @@ public class Login extends AppCompatActivity {
             }
         });
 
-        // כפתור מעבר להרשמה החדש
+        // מעבר למסך הרשמה
         btnGoToRegister.setOnClickListener(v -> {
-            Toast.makeText(this, "מעבר לדף הרשמה...", Toast.LENGTH_SHORT).show();
-            // כאן יבוא Intent לדף הרשמה (Register) כשתבנה אותו
+            Intent intent = new Intent(LoginActivity.this, RegistrationActivity.class);
+            startActivity(intent);
         });
 
         // כפתור שכחת סיסמה

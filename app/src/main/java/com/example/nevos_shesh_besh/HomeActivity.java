@@ -31,7 +31,7 @@ public class HomeActivity extends AppCompatActivity {
 
         btnAuth.setOnClickListener(v -> {
             // שיניתי מ-LoginActivity ל-Login כדי להתאים לשם המחלקה שתיקנו קודם
-            Intent intent = new Intent(HomeActivity.this, Login.class);
+            Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
             startActivity(intent);
         });
     }
