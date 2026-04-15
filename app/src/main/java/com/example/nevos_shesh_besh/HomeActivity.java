@@ -26,10 +26,8 @@ public class HomeActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // --- השורה החדשה שהוספנו ---
-        // הפקודה הזו מוציאה את המשתמש מהחשבון בכל פעם שהאפליקציה נטענת מחדש
+        // יציאה מהחשבון בריענון כדי לשמור על המצב ה"רגיל"
         mAuth.signOut();
-        // ----------------------------
 
         tvWelcome = findViewById(R.id.tv_welcome_user);
         btnAuth = findViewById(R.id.btn_auth);
@@ -38,10 +36,6 @@ public class HomeActivity extends AppCompatActivity {
 
         btnStart.setOnClickListener(v -> startActivity(new Intent(this, MainActivity.class)));
         btnAuth.setOnClickListener(v -> startActivity(new Intent(this, LoginActivity.class)));
-
-        btnLeaderboard.setOnClickListener(v -> {
-            // יחובר בעתיד ללוח התוצאות
-        });
 
         checkUserStatus();
     }
@@ -53,12 +47,12 @@ public class HomeActivity extends AppCompatActivity {
             db.collection("users").document(user.getUid()).get()
                     .addOnSuccessListener(doc -> {
                         if (doc.exists()) {
-                            tvWelcome.setText("שלום " + doc.getString("username") + "!");
+                            String name = doc.getString("username");
+                            tvWelcome.setText("שלום " + name + "!");
                             tvWelcome.setVisibility(View.VISIBLE);
                         }
                     });
         } else {
-            // כשהמשתמש לא מחובר (וזה מה שיקרה עכשיו בכל הפעלה מחדש)
             btnAuth.setVisibility(View.VISIBLE);
             tvWelcome.setVisibility(View.GONE);
         }

@@ -2,26 +2,30 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#2C3E50"> <TextView
-    android:id="@+id/tv_welcome_user"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_alignParentTop="true"
-    android:layout_alignParentLeft="true"
-    android:layout_margin="20dp"
-    android:textColor="#FFFFFF"
-    android:textSize="18sp"
-    android:textStyle="bold"
-    android:visibility="gone" />
+    android:background="#2C3E50">
+
+    <TextView
+        android:id="@+id/tv_welcome_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_centerInParent="true"
-        android:padding="24dp">
+        android:padding="16dp">
 
         <TextView
+            android:id="@+id/tv_main_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Nevo's Shesh Besh"
@@ -29,21 +33,17 @@
             android:textSize="36sp"
             android:textStyle="bold"
             android:layout_gravity="center"
-            android:layout_marginBottom="60dp"
-            android:shadowColor="#000000"
-            android:shadowDx="2"
-            android:shadowDy="2"
-            android:shadowRadius="5" />
+            android:layout_marginBottom="50dp" />
 
         <Button
             android:id="@+id/btn_start_game"
             android:layout_width="match_parent"
-            android:layout_height="75dp"
+            android:layout_height="65dp"
             android:text="התחל לשחק"
             android:textSize="20sp"
             android:backgroundTint="#E67E22"
             android:textColor="#FFFFFF"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="12dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -53,23 +53,24 @@
             <Button
                 android:id="@+id/btn_leaderboard"
                 android:layout_width="0dp"
-                android:layout_height="75dp"
+                android:layout_height="65dp"
                 android:layout_weight="1"
                 android:text="לוח תוצאות"
                 android:textSize="18sp"
                 android:backgroundTint="#34495E"
                 android:textColor="#FFFFFF"
-                android:layout_marginRight="5dp" />
+                android:layout_marginRight="4dp" />
 
             <Button
                 android:id="@+id/btn_auth"
                 android:layout_width="0dp"
-                android:layout_height="75dp"
+                android:layout_height="65dp"
                 android:layout_weight="1"
                 android:text="כניסה/הרשמה"
+                android:textSize="18sp"
                 android:backgroundTint="#34495E"
                 android:textColor="#FFFFFF"
-                android:layout_marginLeft="5dp" />
+                android:layout_marginLeft="4dp" />
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>
