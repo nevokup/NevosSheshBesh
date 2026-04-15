@@ -68,7 +68,7 @@
             android:layout_marginBottom="15dp" />
 
         <TextView
-            android:id="@+id/tv_go_to_register"
+            android:id="@+id/tv_forgot_password"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="שכחת סיסמה?"
