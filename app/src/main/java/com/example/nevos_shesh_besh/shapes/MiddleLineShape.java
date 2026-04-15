@@ -11,7 +11,6 @@ public class MiddleLineShape {
     private Paint p1Paint;
     private Paint p2Paint;
 
-
     public MiddleLineShape(int screenWidth, int screenHeight, int numberOfTriangles) {
         float sectionWidth = (float) screenWidth / (numberOfTriangles + 1);
         float middleLineWidth = sectionWidth;
@@ -22,31 +21,32 @@ public class MiddleLineShape {
         rect = new RectF(left, top, right, bottom);
 
         paint = new Paint();
-        paint.setColor(Color.GREEN);
+        // צבע הבר - עץ כהה מאוד (כהה יותר מהרקע)
+        paint.setColor(Color.rgb(60, 30, 10));
 
         p1Paint = new Paint();
-        p1Paint.setColor(Color.BLUE);
+        p1Paint.setColor(Color.WHITE); // שחקן 1 - לבן
 
         p2Paint = new Paint();
-        p2Paint.setColor(Color.WHITE);
+        p2Paint.setColor(Color.rgb(40, 40, 40)); // שחקן 2 - שחור/אפור כהה
     }
 
     public void draw(Canvas canvas, int p1EatenCount, int p2EatenCount) {
         canvas.drawRect(rect, paint);
 
-        float checkerRadius = rect.width() / 4;
+        float checkerRadius = rect.width() * 0.45f;
 
-        // Draw eaten P1 checkers (Blue)
+        // ציור חיילים אכולים של שחקן 1 (למעלה)
         for (int i = 0; i < p1EatenCount; i++) {
             float cx = rect.centerX();
-            float cy = rect.top + checkerRadius + (i * 2 * checkerRadius); // Start from top
+            float cy = rect.top + checkerRadius + (i * 2.2f * checkerRadius) + 10;
             canvas.drawCircle(cx, cy, checkerRadius, p1Paint);
         }
 
-        // Draw eaten P2 checkers (White)
+        // ציור חיילים אכולים של שחקן 2 (למטה)
         for (int i = 0; i < p2EatenCount; i++) {
             float cx = rect.centerX();
-            float cy = rect.bottom - checkerRadius - (i * 2 * checkerRadius); // Start from bottom
+            float cy = rect.bottom - checkerRadius - (i * 2.2f * checkerRadius) - 10;
             canvas.drawCircle(cx, cy, checkerRadius, p2Paint);
         }
     }

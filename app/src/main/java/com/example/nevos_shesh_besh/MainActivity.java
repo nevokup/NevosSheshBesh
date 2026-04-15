@@ -1,5 +1,6 @@
 package com.example.nevos_shesh_besh;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.widget.EditText;
@@ -117,7 +118,12 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle("המשחק נגמר!")
                 .setMessage(winnerName + " ניצח!\nסוג ניצחון: " + winTypeDesc)
                 .setCancelable(false)
-                .setPositiveButton("חזרה לתפריט", (dialog, which) -> recreate())
+                .setPositiveButton("חזרה לתפריט", (dialog, which) -> {
+                    Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                    finish();
+                })
                 .show();
     }
 }
