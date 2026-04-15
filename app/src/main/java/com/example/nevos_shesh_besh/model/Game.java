@@ -10,12 +10,12 @@ import java.util.Random;
 public class Game {
     private static final String TAG = "Game";
 
-    // הגדרת סוגי הניצחון כדי לפתור את השגיאה ב-MainActivity
     public enum WinType { REGULAR, MARS, KOOCHI }
 
-    // --- הגדרות בדיקה ותורות ---
-    private boolean DeTests = true; // מצב בדיקה להוצאת חיילים מהיר
+    // --- הגדרות מצב משחק ---
+    private boolean DeTests = false;
     public boolean localPlayerIsP1 = true;
+    public boolean isOnlineMode_Internal = false; // משתנה שקובע אם להגביל תורות לשחקן מקומי
     public boolean isP1Turn;
     public boolean isGameOver = false;
     public String winnerName = "";
@@ -35,7 +35,6 @@ public class Game {
     public int p1OffBoard;
     public int p2OffBoard;
 
-    // --- Listener לסיום משחק ---
     public interface GameOverListener {
         void onGameOver(String winnerName, WinType winType, int score);
     }
@@ -62,7 +61,6 @@ public class Game {
             initPositionsP1 = new int[]{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 3, 0, 5, 0, 0, 0, 0, 0};
             initPositionsP2 = new int[]{0, 0, 0, 0, 0, 5, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2};
         } else {
-            // לוח במצב בדיקה (חיילים קרובים לסוף)
             initPositionsP1 = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 3, 2, 3, 2};
             initPositionsP2 = new int[]{2, 3, 2, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         }
@@ -134,7 +132,9 @@ public class Game {
 
     public boolean move(int index) {
         if (isGameOver) return false;
-        if (isP1Turn != localPlayerIsP1) return false;
+
+        // שינוי קריטי: אם אנחנו באונליין, חוסם מהלכים של היריב. אם מקומי, מאפשר הכל.
+        if (isOnlineMode_Internal && (isP1Turn != localPlayerIsP1)) return false;
 
         if (moveFrom == index) {
             if (board[moveFrom] >= 1000) board[moveFrom] -= 1000;
