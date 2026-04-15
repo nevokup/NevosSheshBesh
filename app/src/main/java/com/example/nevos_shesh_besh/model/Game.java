@@ -12,15 +12,14 @@ public class Game {
 
     public enum WinType { REGULAR, MARS, KOOCHI }
 
-    // --- הגדרות מצב משחק ---
-    private boolean DeTests = false;
+    private boolean DeTests = true;
     public boolean localPlayerIsP1 = true;
-    public boolean isOnlineMode_Internal = false; // משתנה שקובע אם להגביל תורות לשחקן מקומי
+    public boolean isOnlineMode_Internal = false;
     public boolean isP1Turn;
     public boolean isGameOver = false;
     public String winnerName = "";
+    public String winTypeString = "";
 
-    // --- רכיבי הלוח ---
     public int[] board;
     public int[] dice;
     public List<Integer> availableMoves;
@@ -36,7 +35,7 @@ public class Game {
     public int p2OffBoard;
 
     public interface GameOverListener {
-        void onGameOver(String winnerName, WinType winType, int score);
+        void onGameOver(String winnerName, String winTypeDesc);
     }
     private GameOverListener gameOverListener;
 
@@ -81,6 +80,7 @@ public class Game {
         map.put("isP1Turn", isP1Turn);
         map.put("isGameOver", isGameOver);
         map.put("winnerName", winnerName);
+        map.put("winTypeString", winTypeString);
         map.put("p1Eaten", p1EatenCount);
         map.put("p2Eaten", p2EatenCount);
         map.put("p1Off", p1OffBoard);
@@ -103,6 +103,7 @@ public class Game {
             isP1Turn = (boolean) map.get("isP1Turn");
             isGameOver = (boolean) map.get("isGameOver");
             winnerName = (String) map.get("winnerName");
+            winTypeString = (String) map.get("winTypeString");
             p1EatenCount = ((Long) map.get("p1Eaten")).intValue();
             p2EatenCount = ((Long) map.get("p2Eaten")).intValue();
             p1OffBoard = ((Long) map.get("p1Off")).intValue();
@@ -132,8 +133,6 @@ public class Game {
 
     public boolean move(int index) {
         if (isGameOver) return false;
-
-        // שינוי קריטי: אם אנחנו באונליין, חוסם מהלכים של היריב. אם מקומי, מאפשר הכל.
         if (isOnlineMode_Internal && (isP1Turn != localPlayerIsP1)) return false;
 
         if (moveFrom == index) {
@@ -247,12 +246,38 @@ public class Game {
     private void checkWinCondition() {
         if (p1OffBoard == 15) {
             isGameOver = true;
-            winnerName = "Player 1";
-            if (gameOverListener != null) gameOverListener.onGameOver(winnerName, WinType.REGULAR, 1);
+            winnerName = "שחקן 1";
+            calculateWinType(true);
+            if (gameOverListener != null) gameOverListener.onGameOver(winnerName, winTypeString);
         } else if (p2OffBoard == 15) {
             isGameOver = true;
-            winnerName = "Player 2";
-            if (gameOverListener != null) gameOverListener.onGameOver(winnerName, WinType.REGULAR, 1);
+            winnerName = "שחקן 2";
+            calculateWinType(false);
+            if (gameOverListener != null) gameOverListener.onGameOver(winnerName, winTypeString);
+        }
+    }
+
+    private void calculateWinType(boolean p1Won) {
+        int opponentOff = p1Won ? p2OffBoard : p1OffBoard;
+        int opponentEaten = p1Won ? p2EatenCount : p1EatenCount;
+
+        if (opponentOff > 0) {
+            winTypeString = "ניצחון רגיל";
+        } else {
+            boolean hasInOpponentHome = false;
+            if (p1Won) {
+                // בית של P1 זה 18-23. בודק אם ל-P2 יש שם חיילים.
+                for (int i = 18; i < 24; i++) if (board[i] >= 100) hasInOpponentHome = true;
+            } else {
+                // בית של P2 זה 0-5. בודק אם ל-P1 יש שם חיילים.
+                for (int i = 0; i < 6; i++) if (board[i] > 0 && board[i] < 100) hasInOpponentHome = true;
+            }
+
+            if (opponentEaten > 0 || hasInOpponentHome) {
+                winTypeString = "ניצחון מארס כוכבים! ⭐⭐⭐";
+            } else {
+                winTypeString = "ניצחון מארס!";
+            }
         }
     }
 

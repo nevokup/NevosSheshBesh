@@ -21,15 +21,14 @@ public class MainActivity extends AppCompatActivity {
         game = new Game();
         networkManager = new NetworkManager();
 
-        game.setGameOverListener((winnerName, winType, score) ->
-                runOnUiThread(() -> showWinnerDialog(winnerName, winType, score))
+        game.setGameOverListener((winnerName, winTypeDesc) ->
+                runOnUiThread(() -> showWinnerDialog(winnerName, winTypeDesc))
         );
 
         showLobbyDialog();
     }
 
     private void showLobbyDialog() {
-        // שינוי שם האופציה השלישית לבקשתך
         String[] options = {"צור משחק", "הצטרף למשחק", "משחק יחיד (מקומי)"};
         new AlertDialog.Builder(this)
                 .setTitle("שש-בש")
@@ -43,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
                         game.isOnlineMode_Internal = true;
                         showJoinDialog();
                     } else {
-                        // משחק יחיד - לא אונליין
                         isOnlineMode = false;
                         game.isOnlineMode_Internal = false;
                         startLocalSinglePlayer();
@@ -53,10 +51,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startLocalSinglePlayer() {
-        game = new Game(); // אתחול נקי
+        game = new Game();
         game.isOnlineMode_Internal = false;
-        game.setGameOverListener((winnerName, winType, score) ->
-                runOnUiThread(() -> showWinnerDialog(winnerName, winType, score))
+        game.setGameOverListener((winnerName, winTypeDesc) ->
+                runOnUiThread(() -> showWinnerDialog(winnerName, winTypeDesc))
         );
         startGameView();
         Toast.makeText(this, "משחק יחיד (מקומי) התחיל", Toast.LENGTH_SHORT).show();
@@ -96,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleRemoteUpdate() {
         if (game.isGameOver) {
-            showWinnerDialog(game.winnerName, Game.WinType.REGULAR, 1);
+            showWinnerDialog(game.winnerName, game.winTypeString);
         }
     }
 
@@ -113,11 +111,11 @@ public class MainActivity extends AppCompatActivity {
         return super.dispatchTouchEvent(ev);
     }
 
-    private void showWinnerDialog(String winnerName, Game.WinType winType, int score) {
+    private void showWinnerDialog(String winnerName, String winTypeDesc) {
         if (isFinishing()) return;
         new AlertDialog.Builder(this)
-                .setTitle("המשחק נגמר")
-                .setMessage("המנצח: " + winnerName)
+                .setTitle("המשחק נגמר!")
+                .setMessage(winnerName + " ניצח!\nסוג ניצחון: " + winTypeDesc)
                 .setCancelable(false)
                 .setPositiveButton("חזרה לתפריט", (dialog, which) -> recreate())
                 .show();
