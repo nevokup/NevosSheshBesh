@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#2C3E50"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="כניסה למערכת"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp" />
+
+        <EditText
+            android:id="@+id/et_username_email"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="שם משתמש / אימייל"
+            android:textColorHint="#BDC3C7"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#FFFFFF"
+            android:padding="8dp"
+            android:gravity="right|center_vertical"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/et_password"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="סיסמה"
+            android:inputType="textPassword"
+            android:textColorHint="#BDC3C7"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#FFFFFF"
+            android:padding="8dp"
+            android:gravity="right|center_vertical"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/btn_login_submit"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:text="התחבר"
+            android:textSize="18sp"
+            android:backgroundTint="#E67E22"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="10dp" />
+
+        <Button
+            android:id="@+id/btn_go_to_register"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:text="עדיין אין לך משתמש? להרשמה..."
+            android:backgroundTint="#34495E"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="15dp" />
+
+        <TextView
+            android:id="@+id/tv_go_to_register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="שכחת סיסמה?"
+            android:textColor="#3498DB"
+            android:textSize="14sp"
+            android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+</ScrollView>

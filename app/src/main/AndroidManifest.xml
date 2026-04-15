@@ -12,6 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Nevos_Shesh_Besh">
         <activity
+            android:name=".Registration"
+            android:exported="false" />
+        <activity android:name=".Login" />
+        <activity
             android:name=".HomeActivity"
             android:exported="true">
             <intent-filter>

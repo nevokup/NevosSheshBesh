@@ -29,10 +29,10 @@ public class HomeActivity extends AppCompatActivity {
             // כאן יבוא Intent למסך ה-Leaderboard
         });
 
-        // כפתור הרשמה - יחובב בהמשך למסך ה-Login/Register
         btnAuth.setOnClickListener(v -> {
-            Toast.makeText(this, "דף הרשמה בבנייה...", Toast.LENGTH_SHORT).show();
-            // כאן יבוא Intent למסך ה-Auth
+            // שיניתי מ-LoginActivity ל-Login כדי להתאים לשם המחלקה שתיקנו קודם
+            Intent intent = new Intent(HomeActivity.this, Login.class);
+            startActivity(intent);
         });
     }
 }
