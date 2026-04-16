@@ -34,6 +34,10 @@ public class RegistrationActivity extends AppCompatActivity {
         etConfirmPass = findViewById(R.id.et_reg_confirm_password);
         etAge = findViewById(R.id.et_reg_age);
         Button btnRegister = findViewById(R.id.btn_register_submit);
+        Button btnBack = findViewById(R.id.btn_back); // כפתור חזרה
+
+        // פונקציונליות חזרה
+        btnBack.setOnClickListener(v -> finish());
 
         btnRegister.setOnClickListener(v -> {
             if (validateInput()) {
@@ -48,13 +52,11 @@ public class RegistrationActivity extends AppCompatActivity {
         String username = etUsername.getText().toString().trim();
         String age = etAge.getText().toString().trim();
 
-        // יצירת משתמש ב-Firebase Auth
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         String userId = mAuth.getCurrentUser().getUid();
 
-                        // שמירת נתונים נוספים ב-Firestore
                         Map<String, Object> user = new HashMap<>();
                         user.put("username", username);
                         user.put("age", Integer.parseInt(age));
@@ -64,7 +66,6 @@ public class RegistrationActivity extends AppCompatActivity {
                                 .set(user)
                                 .addOnSuccessListener(aVoid -> {
                                     Toast.makeText(RegistrationActivity.this, "נרשמת בהצלחה!", Toast.LENGTH_SHORT).show();
-                                    // מעבר לדף הלוג-אין
                                     startActivity(new Intent(RegistrationActivity.this, LoginActivity.class));
                                     finish();
                                 })

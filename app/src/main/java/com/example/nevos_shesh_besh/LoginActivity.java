@@ -30,6 +30,10 @@ public class LoginActivity extends AppCompatActivity {
         EditText etPass = findViewById(R.id.et_password);
         Button btnLogin = findViewById(R.id.btn_login_submit);
         Button btnReg = findViewById(R.id.btn_go_to_register);
+        Button btnBack = findViewById(R.id.btn_back); // כפתור חזרה
+
+        // פונקציונליות חזרה
+        btnBack.setOnClickListener(v -> finish());
 
         btnLogin.setOnClickListener(v -> {
             String input = etInput.getText().toString().trim();
@@ -71,7 +75,7 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        finish(); // חוזר לדף הבית
+                        finish();
                     } else {
                         try {
                             throw task.getException();
