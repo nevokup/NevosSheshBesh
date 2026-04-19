@@ -34,6 +34,11 @@ public class HomeActivity extends AppCompatActivity {
         Button btnStart = findViewById(R.id.btn_start_game);
         Button btnLeaderboard = findViewById(R.id.btn_leaderboard);
 
+        btnLeaderboard.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, LeaderboardActivity.class);
+            startActivity(intent);
+        });
+
         btnStart.setOnClickListener(v -> startActivity(new Intent(this, MainActivity.class)));
         btnAuth.setOnClickListener(v -> startActivity(new Intent(this, LoginActivity.class)));
 

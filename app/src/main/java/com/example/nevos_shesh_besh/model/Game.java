@@ -19,6 +19,9 @@ public class Game {
     public boolean isGameOver = false;
     public String winnerName = "";
     public String winTypeString = "";
+    
+    public String p1Name = "שחקן 1";
+    public String p2Name = "שחקן 2";
 
     public int[] board;
     public int[] dice;
@@ -88,6 +91,8 @@ public class Game {
         map.put("availableMoves", availableMoves);
         map.put("movesToDo", movesToDo);
         map.put("movesMade", movesMade);
+        map.put("p1Name", p1Name);
+        map.put("p2Name", p2Name);
         return map;
     }
 
@@ -110,6 +115,9 @@ public class Game {
             p2OffBoard = ((Long) map.get("p2Off")).intValue();
             movesToDo = ((Long) map.get("movesToDo")).intValue();
             movesMade = ((Long) map.get("movesMade")).intValue();
+            
+            if (map.containsKey("p1Name")) p1Name = (String) map.get("p1Name");
+            if (map.containsKey("p2Name")) p2Name = (String) map.get("p2Name");
 
             List<Long> avail = (List<Long>) map.get("availableMoves");
             availableMoves = new ArrayList<>();
@@ -246,12 +254,12 @@ public class Game {
     private void checkWinCondition() {
         if (p1OffBoard == 15) {
             isGameOver = true;
-            winnerName = "שחקן 1";
+            winnerName = p1Name;
             calculateWinType(true);
             if (gameOverListener != null) gameOverListener.onGameOver(winnerName, winTypeString);
         } else if (p2OffBoard == 15) {
             isGameOver = true;
-            winnerName = "שחקן 2";
+            winnerName = p2Name;
             calculateWinType(false);
             if (gameOverListener != null) gameOverListener.onGameOver(winnerName, winTypeString);
         }
@@ -262,21 +270,19 @@ public class Game {
         int opponentEaten = p1Won ? p2EatenCount : p1EatenCount;
 
         if (opponentOff > 0) {
-            winTypeString = "ניצחון רגיל";
+            winTypeString = "רגיל";
         } else {
             boolean hasInOpponentHome = false;
             if (p1Won) {
-                // בית של P1 זה 18-23. בודק אם ל-P2 יש שם חיילים.
                 for (int i = 18; i < 24; i++) if (board[i] >= 100) hasInOpponentHome = true;
             } else {
-                // בית של P2 זה 0-5. בודק אם ל-P1 יש שם חיילים.
                 for (int i = 0; i < 6; i++) if (board[i] > 0 && board[i] < 100) hasInOpponentHome = true;
             }
 
             if (opponentEaten > 0 || hasInOpponentHome) {
-                winTypeString = "ניצחון מארס כוכבים! ⭐⭐⭐";
+                winTypeString = "מרס כוכבים";
             } else {
-                winTypeString = "ניצחון מארס!";
+                winTypeString = "מרס";
             }
         }
     }
