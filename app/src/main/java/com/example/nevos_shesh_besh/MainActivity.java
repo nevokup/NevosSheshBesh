@@ -18,21 +18,24 @@ public class MainActivity extends AppCompatActivity {
     private CustomSurfaceView gameView;
     private boolean isOnlineMode = false;
     private String currentUsername = "אני";
-    private boolean isResultSaved = false;
+    private boolean isGameOverHandled = false;
+    private boolean isNameSynced = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         game = new Game();
         networkManager = new NetworkManager();
-        isResultSaved = false;
+        isGameOverHandled = false;
+        isNameSynced = false;
 
         loadCurrentUserName();
 
         game.setGameOverListener((winnerName, winTypeDesc) ->
                 runOnUiThread(() -> {
-                    if (!isResultSaved) {
-                        // המנצח מעדכן את הרשת פעם אחרונה
+                    if (!isGameOverHandled) {
+                        isGameOverHandled = true;
+                        // המנצח מעדכן את הרשת פעם אחרונה כדי שהמפסיד יראה
                         if (isOnlineMode) {
                             networkManager.updateGameState(game);
                         }
@@ -52,24 +55,27 @@ public class MainActivity extends AppCompatActivity {
                     .addOnSuccessListener(doc -> {
                         if (doc.exists()) {
                             currentUsername = doc.getString("username");
+                            if (currentUsername != null) {
+                                if (game.localPlayerIsP1) game.p1Name = currentUsername;
+                                else game.p2Name = currentUsername;
+                            }
                         }
                     });
         }
     }
 
     private void saveGameResult(String winnerName, String winTypeDesc) {
-        if (isResultSaved || !isOnlineMode) return;
+        if (!isOnlineMode) return;
         
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null) return;
 
         String opponentName = game.localPlayerIsP1 ? game.p2Name : game.p1Name;
 
-        if (opponentName == null || opponentName.equals("שחקן 1") || opponentName.equals("שחקן 2") || opponentName.equals("מחכה ליריב...")) {
+        // לא שומרים שמות זמניים בטבלה, אבל הדיאלוג יופיע בכל מקרה
+        if (opponentName == null || opponentName.contains("שחקן") || opponentName.equals("מחכה ליריב...")) {
             return;
         }
-
-        isResultSaved = true;
 
         String finalWinner;
         if (currentUsername.equals(winnerName) || "אני".equals(winnerName)) {
@@ -86,12 +92,7 @@ public class MainActivity extends AppCompatActivity {
                 uid
         );
 
-        FirebaseFirestore.getInstance().collection("games")
-                .add(record)
-                .addOnFailureListener(e -> {
-                    isResultSaved = false;
-                    Toast.makeText(this, "שגיאה בשמירת תוצאה", Toast.LENGTH_SHORT).show();
-                });
+        FirebaseFirestore.getInstance().collection("games").add(record);
     }
 
     private void showLobbyDialog() {
@@ -99,7 +100,8 @@ public class MainActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("שש-בש")
                 .setItems(options, (dialog, which) -> {
-                    isResultSaved = false; 
+                    isGameOverHandled = false; 
+                    isNameSynced = false;
                     if (which == 0) {
                         isOnlineMode = true;
                         game.isOnlineMode_Internal = true;
@@ -153,10 +155,14 @@ public class MainActivity extends AppCompatActivity {
                     networkManager.joinGame(input.getText().toString(), data -> {
                         runOnUiThread(() -> {
                             game.updateFromMap(data);
-                            if (currentUsername != null && !currentUsername.equals("אני")) {
+                            
+                            // סינכרון שם פעם אחת
+                            if (!isNameSynced && isOnlineMode) {
+                                isNameSynced = true;
                                 game.p2Name = currentUsername;
                                 networkManager.updateGameState(game);
                             }
+                            
                             handleRemoteUpdate();
                             if (gameView != null) gameView.invalidate();
                         });
@@ -166,8 +172,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleRemoteUpdate() {
-        if (game.isGameOver && !isResultSaved) {
-            // המפסיד מזהה שהמשחק נגמר דרך הרשת
+        if (game.isGameOver && !isGameOverHandled) {
+            isGameOverHandled = true;
+            // גם המפסיד מציג את הדיאלוג ושומר תוצאה
             saveGameResult(game.winnerName, game.winTypeString);
             showWinnerDialog(game.winnerName, game.winTypeString);
         }
@@ -180,8 +187,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        if (ev.getAction() == MotionEvent.ACTION_UP && isOnlineMode && !game.isGameOver) {
-            networkManager.updateGameState(game);
+        if (isOnlineMode && !isGameOverHandled) {
+            if (ev.getAction() == MotionEvent.ACTION_UP) {
+                networkManager.updateGameState(game);
+            }
         }
         return super.dispatchTouchEvent(ev);
     }
