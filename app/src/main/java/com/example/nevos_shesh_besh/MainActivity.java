@@ -35,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     if (!isGameOverHandled) {
                         isGameOverHandled = true;
-                        // המנצח מעדכן את הרשת פעם אחרונה כדי שהמפסיד יראה
                         if (isOnlineMode) {
                             networkManager.updateGameState(game);
                         }
@@ -45,7 +44,45 @@ public class MainActivity extends AppCompatActivity {
                 })
         );
 
-        showLobbyDialog();
+        // בדיקה אם הגענו מ-HomeActivity עם מצב משחק ספציפי
+        String mode = getIntent().getStringExtra("mode");
+        if (mode != null) {
+            handleStartingMode(mode);
+        } else {
+            showLobbyDialog();
+        }
+    }
+
+    private void handleStartingMode(String mode) {
+        switch (mode) {
+            case "create":
+                isOnlineMode = true;
+                game.isOnlineMode_Internal = true;
+                game.localPlayerIsP1 = true;
+                game.p1Name = currentUsername;
+                game.p2Name = "שחקן 2";
+                startGameAsHost();
+                break;
+            case "join":
+                isOnlineMode = true;
+                game.isOnlineMode_Internal = true;
+                game.localPlayerIsP1 = false;
+                game.p1Name = "שחקן 1";
+                game.p2Name = currentUsername;
+                showJoinDialog();
+                break;
+            case "local":
+                isOnlineMode = false;
+                game.isOnlineMode_Internal = false;
+                game.localPlayerIsP1 = true;
+                game.p1Name = currentUsername;
+                game.p2Name = "מחשב";
+                startLocalSinglePlayer();
+                break;
+            default:
+                showLobbyDialog();
+                break;
+        }
     }
 
     private void loadCurrentUserName() {
@@ -55,10 +92,6 @@ public class MainActivity extends AppCompatActivity {
                     .addOnSuccessListener(doc -> {
                         if (doc.exists()) {
                             currentUsername = doc.getString("username");
-                            if (currentUsername != null) {
-                                if (game.localPlayerIsP1) game.p1Name = currentUsername;
-                                else game.p2Name = currentUsername;
-                            }
                         }
                     });
         }
@@ -72,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
 
         String opponentName = game.localPlayerIsP1 ? game.p2Name : game.p1Name;
 
-        // לא שומרים שמות זמניים בטבלה, אבל הדיאלוג יופיע בכל מקרה
         if (opponentName == null || opponentName.contains("שחקן") || opponentName.equals("מחכה ליריב...")) {
             return;
         }
@@ -100,30 +132,9 @@ public class MainActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("שש-בש")
                 .setItems(options, (dialog, which) -> {
-                    isGameOverHandled = false; 
-                    isNameSynced = false;
-                    if (which == 0) {
-                        isOnlineMode = true;
-                        game.isOnlineMode_Internal = true;
-                        game.localPlayerIsP1 = true;
-                        game.p1Name = currentUsername;
-                        game.p2Name = "שחקן 2";
-                        startGameAsHost();
-                    } else if (which == 1) {
-                        isOnlineMode = true;
-                        game.isOnlineMode_Internal = true;
-                        game.localPlayerIsP1 = false;
-                        game.p1Name = "שחקן 1";
-                        game.p2Name = currentUsername;
-                        showJoinDialog();
-                    } else {
-                        isOnlineMode = false;
-                        game.isOnlineMode_Internal = false;
-                        game.localPlayerIsP1 = true;
-                        game.p1Name = currentUsername;
-                        game.p2Name = "מחשב";
-                        startLocalSinglePlayer();
-                    }
+                    if (which == 0) handleStartingMode("create");
+                    else if (which == 1) handleStartingMode("join");
+                    else handleStartingMode("local");
                 })
                 .setCancelable(false).show();
     }
@@ -155,14 +166,11 @@ public class MainActivity extends AppCompatActivity {
                     networkManager.joinGame(input.getText().toString(), data -> {
                         runOnUiThread(() -> {
                             game.updateFromMap(data);
-                            
-                            // סינכרון שם פעם אחת
                             if (!isNameSynced && isOnlineMode) {
                                 isNameSynced = true;
                                 game.p2Name = currentUsername;
                                 networkManager.updateGameState(game);
                             }
-                            
                             handleRemoteUpdate();
                             if (gameView != null) gameView.invalidate();
                         });
@@ -174,7 +182,6 @@ public class MainActivity extends AppCompatActivity {
     private void handleRemoteUpdate() {
         if (game.isGameOver && !isGameOverHandled) {
             isGameOverHandled = true;
-            // גם המפסיד מציג את הדיאלוג ושומר תוצאה
             saveGameResult(game.winnerName, game.winTypeString);
             showWinnerDialog(game.winnerName, game.winTypeString);
         }

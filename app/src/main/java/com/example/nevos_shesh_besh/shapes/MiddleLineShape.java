@@ -10,8 +10,10 @@ public class MiddleLineShape {
     private Paint paint;
     private Paint p1Paint;
     private Paint p2Paint;
+    private float screenWidth;
 
     public MiddleLineShape(int screenWidth, int screenHeight, int numberOfTriangles) {
+        this.screenWidth = screenWidth;
         float sectionWidth = (float) screenWidth / (numberOfTriangles + 1);
         float middleLineWidth = sectionWidth;
         float left = (screenWidth / 2f) - (middleLineWidth / 2f);
@@ -21,32 +23,32 @@ public class MiddleLineShape {
         rect = new RectF(left, top, right, bottom);
 
         paint = new Paint();
-        // צבע הבר - עץ כהה מאוד (כהה יותר מהרקע)
         paint.setColor(Color.rgb(60, 30, 10));
 
         p1Paint = new Paint();
-        p1Paint.setColor(Color.WHITE); // שחקן 1 - לבן
+        p1Paint.setColor(Color.WHITE);
 
         p2Paint = new Paint();
-        p2Paint.setColor(Color.rgb(40, 40, 40)); // שחקן 2 - שחור/אפור כהה
+        p2Paint.setColor(Color.rgb(40, 40, 40));
     }
 
     public void draw(Canvas canvas, int p1EatenCount, int p2EatenCount) {
         canvas.drawRect(rect, paint);
 
-        float checkerRadius = rect.width() * 0.45f;
+        // חישוב רדיוס מדויק שתואם למשולשים (0.45 * 0.9 * רוחב_סקציה / 2)
+        float triangleSectionWidth = screenWidth / 13f;
+        float triangleWidth = 0.9f * triangleSectionWidth;
+        float checkerRadius = 0.42f * triangleWidth / 2f; // הקטנה קלה לשיפור המראה
 
-        // ציור חיילים אכולים של שחקן 1 (למעלה)
         for (int i = 0; i < p1EatenCount; i++) {
             float cx = rect.centerX();
-            float cy = rect.top + checkerRadius + (i * 2.2f * checkerRadius) + 10;
+            float cy = rect.top + checkerRadius + (i * 2.1f * checkerRadius) + 15;
             canvas.drawCircle(cx, cy, checkerRadius, p1Paint);
         }
 
-        // ציור חיילים אכולים של שחקן 2 (למטה)
         for (int i = 0; i < p2EatenCount; i++) {
             float cx = rect.centerX();
-            float cy = rect.bottom - checkerRadius - (i * 2.2f * checkerRadius) - 10;
+            float cy = rect.bottom - checkerRadius - (i * 2.1f * checkerRadius) - 15;
             canvas.drawCircle(cx, cy, checkerRadius, p2Paint);
         }
     }
