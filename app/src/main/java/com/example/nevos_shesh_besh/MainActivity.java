@@ -32,6 +32,10 @@ public class MainActivity extends AppCompatActivity {
         game.setGameOverListener((winnerName, winTypeDesc) ->
                 runOnUiThread(() -> {
                     if (!isResultSaved) {
+                        // המנצח מעדכן את הרשת פעם אחרונה
+                        if (isOnlineMode) {
+                            networkManager.updateGameState(game);
+                        }
                         saveGameResult(winnerName, winTypeDesc);
                         showWinnerDialog(winnerName, winTypeDesc);
                     }
@@ -59,10 +63,8 @@ public class MainActivity extends AppCompatActivity {
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null) return;
 
-        // קביעת שם היריב
         String opponentName = game.localPlayerIsP1 ? game.p2Name : game.p1Name;
 
-        // דרישה: לא לשמור אם זה עדיין שם ברירת מחדל או לא שם אמיתי
         if (opponentName == null || opponentName.equals("שחקן 1") || opponentName.equals("שחקן 2") || opponentName.equals("מחכה ליריב...")) {
             return;
         }
@@ -165,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleRemoteUpdate() {
         if (game.isGameOver && !isResultSaved) {
+            // המפסיד מזהה שהמשחק נגמר דרך הרשת
             saveGameResult(game.winnerName, game.winTypeString);
             showWinnerDialog(game.winnerName, game.winTypeString);
         }
