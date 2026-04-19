@@ -12,7 +12,7 @@ public class Game {
 
     public enum WinType { REGULAR, MARS, KOOCHI }
 
-    private boolean DeTests = true;
+    private boolean DeTests = false;
     public boolean localPlayerIsP1 = true;
     public boolean isOnlineMode_Internal = false;
     public boolean isP1Turn;

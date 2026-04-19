@@ -84,17 +84,5 @@
             android:textColor="#FFFFFF"
             android:layout_marginBottom="15dp" />
 
-        <TextView
-            android:id="@+id/tv_forgot_password"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="שכחת סיסמה?"
-            android:textColor="#3498DB"
-            android:textSize="14sp"
-            android:padding="8dp"
-            android:clickable="true"
-            android:focusable="true" />
-
-
     </LinearLayout>
 </ScrollView>
