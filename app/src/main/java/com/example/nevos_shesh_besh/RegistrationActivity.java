@@ -7,21 +7,26 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.HashMap;
 import java.util.Map;
 
 public class RegistrationActivity extends AppCompatActivity {
+// מחלקת מסך ההרשמה של האפליקציה, היורשת מ-AppCompatActivity.
 
     private EditText etEmail, etUsername, etPassword, etConfirmPass, etAge;
+    // הגדרת שדות הקלט הגרפיים (תיבות טקסט) לקליטת נתוני המשתמש (אימייל, שם משתמש, סיסמאות וגיל).
+
     private FirebaseAuth mAuth;
+    // רכיב ה-Authentication של Firebase האחראי על רישום וניהול חשבונות המשתמשים בענן.
+
     private FirebaseFirestore db;
+    // רכיב בסיס הנתונים Firestore לשמירת המידע המשוייך למשתמש (שם וגיל) שלא נשמרים אוטומטית ברכיב ה-Auth.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // פונקציית האתחול של המסך. מקשרת את הרכיבים לקובץ ה-XML ומגדירה מאזיני לחיצה לכפתורים.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
 
@@ -34,19 +39,21 @@ public class RegistrationActivity extends AppCompatActivity {
         etConfirmPass = findViewById(R.id.et_reg_confirm_password);
         etAge = findViewById(R.id.et_reg_age);
         Button btnRegister = findViewById(R.id.btn_register_submit);
-        Button btnBack = findViewById(R.id.btn_back); // כפתור חזרה
+        Button btnBack = findViewById(R.id.btn_back);
 
-        // פונקציונליות חזרה
         btnBack.setOnClickListener(v -> finish());
+        // בעת לחיצה על כפתור חזרה, המסך הנוכחי נסגר (יוצא מהמחסנית) והמשתמש חוזר למסך הקודם.
 
         btnRegister.setOnClickListener(v -> {
             if (validateInput()) {
                 registerUser();
             }
         });
+        // בעת לחיצה על כפתור הרשמה, מתבצעת קודם כל בדיקת תקינות קלט (ולקציה), ואם הכל תקין, מופעל תהליך הרישום.
     }
 
     private void registerUser() {
+        // פונקציה המבצעת את הרישום בפועל: יוצרת משתמש ב-Firebase Auth, ובמידה והצליחה, שומרת את הפרטים הנוספים (שם, גיל) ב-Firestore תחת מזהה המשתמש הייחודי (UID).
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString();
         String username = etUsername.getText().toString().trim();
@@ -79,6 +86,7 @@ public class RegistrationActivity extends AppCompatActivity {
     }
 
     private boolean validateInput() {
+        // פונקציה הבודקת את תקינות הנתונים שהוקלדו (אימייל בפורמט נכון, אורך סיסמה מעל 6 תווים, התאמה בין סיסמאות, ושדות לא ריקים). מחזירה True אם הכל תקין ו-False אם יש שגיאה.
         String email = etEmail.getText().toString().trim();
         String username = etUsername.getText().toString().trim();
         String password = etPassword.getText().toString();
@@ -109,6 +117,7 @@ public class RegistrationActivity extends AppCompatActivity {
     }
 
     private void showError(EditText input, String message) {
+        // פונקציית עזר המציגה שגיאה חזותית מובנית מעל שדה קלט ספציפי וממקדת את המקלדת אליו (Focus).
         input.setError(message);
         input.requestFocus();
     }

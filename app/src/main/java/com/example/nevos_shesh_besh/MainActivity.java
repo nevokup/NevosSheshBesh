@@ -13,16 +13,32 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity {
+// מחלקת המסך הראשית של המשחק, היורשת מ-AppCompatActivity ומנהלת את מהלך משחק השש-בש.
+
     private Game game;
+    // אובייקט הלוגיקה של המשחק (מכיל את מצב הלוח, התורות, האכילות וכו').
+
     private NetworkManager networkManager;
+    // רכיב האחראי על ניהול התקשורת מול מסד הנתונים בזמן אמת (Firebase) עבור משחק אונליין.
+
     private CustomSurfaceView gameView;
+    // רכיב תצוגה מותאם אישית (SurfaceView) האחראי על ציור הלוח והחיילים על המסך ברמת ביצועים גבוהה.
+
     private boolean isOnlineMode = false;
+    // משתנה בוליאני המסמן האם המשחק הנוכחי מתנהל ברשת (אונליין) או מקומית.
+
     private String currentUsername = "אני";
+    // משתנה השומר את שם המשתמש הנוכחי (נשלף מה-Firebase).
+
     private boolean isGameOverHandled = false;
+    // משתנה הגנה שנועד לוודא שתהליך סיום המשחק (שמירת תוצאה, הצגת דיאלוג) יתבצע פעם אחת בלבד.
+
     private boolean isNameSynced = false;
+    // משתנה המסמן האם השמות של השחקנים סונכרנו בהצלחה מול שרת האונליין.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // פונקציית מחזור החיים הראשונה שרצה בעת יצירת המסך. משמשת לאתחול רכיבים, מאזינים וטעינת נתונים ראשונית.
         super.onCreate(savedInstanceState);
         game = new Game();
         networkManager = new NetworkManager();
@@ -43,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
         );
+        // הגדרת מאזין לסיום המשחק (Callback). ברגע שהלוגיקה מזהה מנצח, הפונקציה רצה על ה-UI Thread (שרשור התצוגה), מעדכנת את השרת, שומרת את התוצאה ומציגה הודעת ניצחון.
 
         // בדיקה אם הגענו מ-HomeActivity עם מצב משחק ספציפי
         String mode = getIntent().getStringExtra("mode");
@@ -51,9 +68,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             showLobbyDialog();
         }
+        // שליפת מצב המשחק שנבחר במסך הקודם (יצירת חדר, הצטרפות או משחק מקומי). אם לא הועבר מצב, נפתח תפריט בחירה (Lobby).
     }
 
     private void handleStartingMode(String mode) {
+        // פונקציה המקבלת את מצב המשחק ומאתחלת את חוקי המשחק בהתאם (למשל: מי שחקן 1, מי שחקן 2 והאם מדובר באונליין).
         switch (mode) {
             case "create":
                 isOnlineMode = true;
@@ -86,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadCurrentUserName() {
+        // פונקציה השולפת את ה-UID של המשתמש המחובר מ-Firebase Auth, ולאחר מכן ניגשת ל-Firestore כדי להביא את שם המשתמש האמיתי שלו מה-Database.
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid != null) {
             FirebaseFirestore.getInstance().collection("users").document(uid).get()
@@ -98,8 +118,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveGameResult(String winnerName, String winTypeDesc) {
+        // פונקציה השומרת את היסטוריית המשחק (שם היריב, המנצח, סוג הניצחון וזמן המשחק) לתוך אוסף (Collection) בשם "games" במסד הנתונים Firestore - רלוונטי רק למשחקי אונליין.
         if (!isOnlineMode) return;
-        
+
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null) return;
 
@@ -128,6 +149,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showLobbyDialog() {
+        // פונקציה המציגה תיבת דיאלוג (AlertDialog) לבחירת סוג המשחק במקרה שהמשתמש הגיע למסך ללא הגדרה מוקדמת.
         String[] options = {"צור משחק", "הצטרף למשחק", "משחק יחיד (מקומי)"};
         new AlertDialog.Builder(this)
                 .setTitle("שש-בש")
@@ -140,11 +162,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startLocalSinglePlayer() {
+        // פונקציה המפעילה משחק מקומי על המכשיר ומציגה הודעת חיווי מהירה (Toast).
         startGameView();
         Toast.makeText(this, "משחק יחיד התחיל", Toast.LENGTH_SHORT).show();
     }
 
     private void startGameAsHost() {
+        // פונקציה המייצרת קוד חדר אקראי בן 4 ספרות, פותחת חדר חדש ב-Firebase דרך ה-NetworkManager, ומגדירה מאזין לעדכונים מהשחקן השני שיצטרף.
         String code = String.valueOf((int)(Math.random() * 9000) + 1000);
         networkManager.createGame(code, game, data -> {
             runOnUiThread(() -> {
@@ -158,6 +182,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showJoinDialog() {
+        // פונקציה המציגה תיבת דיאלוג עם שדה טקסט שבה השחקן השני מקליד את קוד החדר כדי להתחבר למשחק קיים דרך ה-NetworkManager.
         final EditText input = new EditText(this);
         new AlertDialog.Builder(this)
                 .setTitle("הכנס קוד")
@@ -180,6 +205,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleRemoteUpdate() {
+        // פונקציה הבודקת בעת קבלת עדכון מהרשת האם המשחק הסתיים בצד השני, ואם כן מטפלת בסיום המשחק גם אצל השחקן הנוכחי.
         if (game.isGameOver && !isGameOverHandled) {
             isGameOverHandled = true;
             saveGameResult(game.winnerName, game.winTypeString);
@@ -188,12 +214,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startGameView() {
+        // פונקציה המאתחלת את רכיב התצוגה הגרפית (CustomSurfaceView) ומגדירה אותו כמסך הראשי של ה-Activity (במקום קובץ XML רגיל).
         gameView = new CustomSurfaceView(this, game);
         setContentView(gameView);
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        // פונקציית מערכת שמירטת כל נגיעה במסך. אם מדובר במשחק אונליין והשחקן הרים את האצבע מהמסך (ACTION_UP), מצב המשחק העדכני נשלח מיד לענן כדי לסנכרן את היריב.
         if (isOnlineMode && !isGameOverHandled) {
             if (ev.getAction() == MotionEvent.ACTION_UP) {
                 networkManager.updateGameState(game);
@@ -203,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showWinnerDialog(String winnerName, String winTypeDesc) {
+        // פונקציה המציגה תיבת דיאלוג חגיגית בסיום המשחק המפרטת מי המנצח ואיך הוא ניצח (רגיל/מרס), ומאפשרת חזרה לתפריט הראשי תוך סגירת המשחק הנוכחי מהזיכרון.
         if (isFinishing()) return;
         new AlertDialog.Builder(this)
                 .setTitle("המשחק נגמר!")
